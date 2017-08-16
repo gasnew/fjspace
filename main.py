@@ -25,7 +25,7 @@ sys_font = pygame.font.Font("C:\Windows\Fonts\8514oem.fon", 50)
 # gameplay params
 WIN_TIME = 6
 COOLDOWN_TIME = 2
-TOTAL_TIME = 1
+TOTAL_TIME = 35
 FAILURE_TIME = 0.5
 
 # visual params
@@ -53,7 +53,7 @@ def state_response(state):
   if state == GameState.COUNTDOWN:
     game.reset()
 
-game_state = GameState(state_response)
+game_state = GameState(GameState.RUNNING, state_response)
 
 # render thing(s) (can't put this in game or hud?)
 counter = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)

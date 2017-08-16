@@ -5,12 +5,12 @@ class GameState:
   WHEEL = 1
   VICTORY = 2
   COUNTDOWN = 3
-  STATE_TIMERS = [0, 2, 2, 1]
+  STATE_TIMERS = [0, 2, 2, 3]
 
-  def __init__(self, func):
+  def __init__(self, state, func):
     self.game_callback = func
 
-    self.set_state(GameState.COUNTDOWN)
+    self.set_state(state)
 
   def update(self, delta_t):
     self.state_timer = self.state_timer - (delta_t / 1000) if self.state_timer > 0 else 0

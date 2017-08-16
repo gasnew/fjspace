@@ -50,7 +50,7 @@ class Game:
     self.space_text = ShadowedPressable(space_text, space_text_shadow, (game_rect.width / 2, game_rect.height * 0.8), shadow_dist)
 
     self.space_text_cover = pygame.Surface((self.space_text.surface.get_width(), self.space_text.surface.get_height())).convert_alpha()
-    self.space_text_cover.fill((100, 100, 100))
+    self.space_text_cover.fill((135, 135, 135))
 
     # -- GAMEPLAY --
     self.reset()
@@ -116,13 +116,14 @@ class Game:
     f, j, s = self.keys.f, self.keys.j, self.keys.s
     self.f_text.down = f
     self.j_text.down = j
-    self.space_text.down = s
+    self.space_text.down = s or self.cooldown > 0
     self.f_text.render(screen)
     self.j_text.render(screen)
 
     if render_space:
       self.space_text.render(screen)
-      if self.cooldown > 0: #or (not f and not j):
+      
+      if self.cooldown > 0 or (not f and not j):
         cover_size = self.cooldown if self.cooldown > 0 else 1
         disp = 0 if self.space_text.down else self.shadow_dist
 

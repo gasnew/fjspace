@@ -1,0 +1,52 @@
+TODO
+----
+
+New Classes
+- GameColor
+  - e.g. GameColor.F.Light
+- Tweener
+  - Tweener(init_val)
+  - .add_waypoint("win_place", win_val)
+  - .to("win_place", Tweener.EASE_OUT)
+  - .val
+  - .draw_val
+
+Visual Improvements
++ [SPACE] states
+  + Gray and down on cooldown
+  + Up and white when can space
+  + Up and gray when cannot space
+  + Down and gray when pressed and cannot space
+
+Menu
+- At any time, hold [1] to view menu
+  - Practice mode
+    - Normal mode with no scoreboard consequences
+    - Show 3 instructions with special blend mode for awesome watermark display
+    - PRACTICE MODE across bottom
+  - Reset current round
+  - Reset scoreboard(?)
+  - Change players
+- While holding [1], hold a key and release [1] to activate functionality
+
+Game
+- WIN and LOSE text for game end
+- Wheel
+  - percentages next to wedges
+  - animated wedge opening (pf, pj, and mag)
+- Special timer countdown for final 7 seconds
+- End game if [SPACE] held for 6 seconds
+
+Hotseat Mode
+- Open game with two text boxes for names. Hit '+' to add more, '-' to subtract
+- Once begin, PLAYER vs. PLAYER
+  - Possibly include some stats here
+  - hold [F] and [J] to begin
+- Once bo5 over, show winner, and swap in next opponent
+
+Scoreboard
+- Show all current players
+- Stats
+  - Wins
+  - Games played
+  - Times Spaced
