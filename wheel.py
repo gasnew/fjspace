@@ -3,6 +3,7 @@ import pygame
 from pygame.locals import *
 from math import *
 import random
+from gameColor import GameColor
 
 class Wheel:
   RES = 32
@@ -51,16 +52,16 @@ class Wheel:
     surface = pygame.Surface(Wheel.SIZE, pygame.SRCALPHA).convert_alpha()
     
     # draw wedges
-    pygame.draw.polygon(shadow_surface, (50, 50, 50), self.make_wedge(0.0, self.pf))
-    pygame.draw.polygon(shadow_surface, (50, 50, 50), self.make_wedge(self.pf, 1.0))
-    pygame.draw.polygon(surface, (168, 132, 35), self.make_wedge(0.0, self.pf))
-    pygame.draw.polygon(surface, (28, 68, 142), self.make_wedge(self.pf, 1.0))
+    pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(0.0, self.pf))
+    pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(self.pf, 1.0))
+    pygame.draw.polygon(surface, GameColor.F.Med, self.make_wedge(0.0, self.pf))
+    pygame.draw.polygon(surface, GameColor.J.Med, self.make_wedge(self.pf, 1.0))
 
     # draw hand
     mag = Wheel.RES / 2
     start = (Wheel.RES / 2, Wheel.RES / 2)
     end = (start[0] + -mag * sin(2 * pi * self.arm_angle), start[1] + -mag * cos(2 * pi * self.arm_angle))
-    pygame.draw.line(surface, (50, 50, 50), start, end, 3)
+    pygame.draw.line(surface, GameColor.Shadow, start, end, 3)
 
     # scale and blit to screen
     shadow_surface = pygame.transform.scale(shadow_surface, self.rect.size)

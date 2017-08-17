@@ -9,6 +9,7 @@ from keys import Keys
 from hud import Hud
 from gameState import GameState
 from textRenderer import TextRenderer
+from gameColor import GameColor
 
 # init logging
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
@@ -46,7 +47,7 @@ f_wins = j_wins = 0
 keys = Keys()
 game = Game(WIN_TIME, COOLDOWN_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font)
 wheel = Wheel(game_rect, shadow_dist, sys_font)
-hud = Hud(top_rect, bottom_rect, shadow_dist, sys_font, (111, 134, 149), (206, 194, 136))
+hud = Hud(top_rect, bottom_rect, shadow_dist, sys_font)
 
 # state stuff
 def state_response(state):
@@ -110,12 +111,12 @@ while 1:
   if game_state.state == GameState.WHEEL:
     wheel.render(screen, delta_t)
 
-  pygame.draw.rect(screen, (206, 194, 136), top_rect_left)
-  pygame.draw.rect(screen, (111, 134, 149), top_rect_right)
-  pygame.draw.rect(screen, (50, 50, 50), bottom_rect)
+  pygame.draw.rect(screen, GameColor.F.Med, top_rect_left)
+  pygame.draw.rect(screen, GameColor.J.Med, top_rect_right)
+  pygame.draw.rect(screen, GameColor.Shadow, bottom_rect)
 
-  for rect in f_win_rects: pygame.draw.rect(screen, (221, 218, 199), rect)
-  for rect in j_win_rects: pygame.draw.rect(screen, (204, 214, 221), rect)
+  for rect in f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
+  for rect in j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 
   hud.render_stuff(screen, game.timer, game.perc_f, game.perc_j, render_percs = game_state.state == GameState.RUNNING)
 

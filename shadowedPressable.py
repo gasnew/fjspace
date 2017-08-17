@@ -1,11 +1,12 @@
 import logging
 import pygame
+from gameColor import GameColor
 
 class ShadowedPressable:
-  def make_pressable_key(string, font, scale, color = (255, 255, 255)):
+  def make_pressable_key(string, font, scale, color = GameColor.White):
     text = font.render(string, 0, color)
     text = pygame.transform.scale(text, (text.get_width() * scale, text.get_height() * scale))
-    text_shadow = font.render(string, 0, (50, 50, 50))
+    text_shadow = font.render(string, 0, GameColor.Shadow)
     text_shadow = pygame.transform.scale(text_shadow, (text_shadow.get_width() * scale, text_shadow.get_height() * scale))
 
     return text, text_shadow

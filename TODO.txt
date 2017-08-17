@@ -1,6 +1,9 @@
 TODO
 ----
 
+Bugs
+- can't draw infinitesimal wedges
+
 New Classes
 - GameColor
   - e.g. GameColor.F.Light
@@ -17,6 +20,8 @@ Visual Improvements
   + Up and white when can space
   + Up and gray when cannot space
   + Down and gray when pressed and cannot space
+- Wheel
+  - Draw hand as wedge?
 
 Menu
 - At any time, hold [1] to view menu

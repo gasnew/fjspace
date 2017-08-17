@@ -3,6 +3,7 @@ import logging, sys
 import random
 import pygame
 from pygame.locals import *
+from gameColor import GameColor
 from shadowedPressable import *
 
 class Game:
@@ -32,9 +33,9 @@ class Game:
     self.bj_rect.centerx = game_rect.width / 2 + self.bar_x_offset
 
     # colors
-    self.f_background_color = Color(221, 218, 199)
+    self.f_background_color = Color(*GameColor.F.Light)
     self.fbc = Color(self.f_background_color.r, self.f_background_color.g, self.f_background_color.b)
-    self.j_background_color = Color(204, 214, 221)
+    self.j_background_color = Color(*GameColor.J.Light)
     self.jbc = Color(self.j_background_color.r, self.j_background_color.g, self.j_background_color.b)
 
     # pressables
@@ -50,7 +51,7 @@ class Game:
     self.space_text = ShadowedPressable(space_text, space_text_shadow, (game_rect.width / 2, game_rect.height * 0.8), shadow_dist)
 
     self.space_text_cover = pygame.Surface((self.space_text.surface.get_width(), self.space_text.surface.get_height())).convert_alpha()
-    self.space_text_cover.fill((135, 135, 135))
+    self.space_text_cover.fill(GameColor.Space.Down)
 
     # -- GAMEPLAY --
     self.reset()
@@ -108,9 +109,9 @@ class Game:
 
     # bars rendering
     self.bf_rect.height = -self.game_rect.height * self.bf
-    pygame.draw.rect(screen, (168, 132, 35), self.bf_rect)
+    pygame.draw.rect(screen, GameColor.F.Dark, self.bf_rect)
     self.bj_rect.height = -self.game_rect.height * self.bj
-    pygame.draw.rect(screen, (28, 68, 142), self.bj_rect)
+    pygame.draw.rect(screen, GameColor.J.Dark, self.bj_rect)
 
     # pressables rendering
     f, j, s = self.keys.f, self.keys.j, self.keys.s

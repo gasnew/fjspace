@@ -1,15 +1,16 @@
 import logging
+from gameColor import GameColor
 from textRenderer import TextRenderer
 
 class Hud:
-  def __init__(self, top_rect, bottom_rect, shadow_dist, sys_font, l_color, r_color):
+  def __init__(self, top_rect, bottom_rect, shadow_dist, sys_font):
     self.top_rect = top_rect
     self.bottom_rect = bottom_rect
     self.shadow_dist = shadow_dist
 
     self.timer_text = TextRenderer(sys_font, 2, (top_rect.centerx, top_rect.bottom - top_rect.height * 0.2), shadow_dist)
-    self.perc_f_text = TextRenderer(sys_font, 4, (top_rect.width / 4, top_rect.centery), shadow_dist, color = l_color)
-    self.perc_j_text = TextRenderer(sys_font, 4, (top_rect.width * 3 / 4, top_rect.centery), shadow_dist, color = r_color)
+    self.perc_f_text = TextRenderer(sys_font, 4, (top_rect.width / 4, top_rect.centery), shadow_dist, color = GameColor.J.Med)
+    self.perc_j_text = TextRenderer(sys_font, 4, (top_rect.width * 3 / 4, top_rect.centery), shadow_dist, color = GameColor.F.Med)
 
   def hud_stuff(self):
     pass

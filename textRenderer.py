@@ -1,8 +1,9 @@
 import logging
+from gameColor import GameColor
 from shadowedPressable import ShadowedPressable
 
 class TextRenderer:
-  def __init__(self, font, scale, center, shadow_dist, color = (255, 255, 255)):
+  def __init__(self, font, scale, center, shadow_dist, color = GameColor.White):
     self.font = font
     self.scale = scale
     self.center = center
