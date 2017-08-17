@@ -22,12 +22,12 @@ class Wheel:
 
     self.reset()
 
-    # self.start(5, 0.5, 0.5)
+    self.start(2, 0.5, 0.5)
 
   def reset(self):
     self.spin_time = 2
     self.pf = self.pj = 0.5
-    self.winning_angle = self.arm_angle = self.arm_v0 = self.t_elapsed = 0.0
+    self.winning_angle = self.arm_angle = self.prev_arm_angle = self.arm_v0 = self.t_elapsed = 0.0
 
   def start(self, spin_time, pf, pj):
     self.spin_time = spin_time
@@ -38,10 +38,12 @@ class Wheel:
     final_angle = self.winning_angle + Wheel.REVOLUTIONS
     self.arm_v0 = 2 * final_angle / spin_time
 
+    self.prev_arm_angle = 0
     self.t_elapsed = 0.0
 
   def wheel_stuff(self, delta_t):
     self.t_elapsed += (delta_t / 1000)
+    self.prev_arm_angle = self.arm_angle
     self.arm_angle = self.arm_v0 * self.t_elapsed + 1/2 * (-self.arm_v0 / self.spin_time) * self.t_elapsed**2
 
     return (self.t_elapsed >= self.spin_time, "f" if self.winning_angle < self.pf else "j")
@@ -61,7 +63,9 @@ class Wheel:
     mag = Wheel.RES / 2
     start = (Wheel.RES / 2, Wheel.RES / 2)
     end = (start[0] + -mag * sin(2 * pi * self.arm_angle), start[1] + -mag * cos(2 * pi * self.arm_angle))
-    pygame.draw.line(surface, GameColor.Shadow, start, end, 3)
+    # pygame.draw.line(surface, GameColor.Shadow, start, end, 3)
+    pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle))
+    pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle), 3)
 
     # scale and blit to screen
     shadow_surface = pygame.transform.scale(shadow_surface, self.rect.size)
@@ -79,4 +83,5 @@ class Wheel:
       points.append((center[0] + -mag * sin(2 * pi * a), center[1] + -mag * cos(2 * pi * a)))
       a += Wheel.ANGLE_INTERVAL
 
+    points.append(center) # must be at least 3 points long
     return points

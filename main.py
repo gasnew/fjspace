@@ -54,7 +54,7 @@ def state_response(state):
   if state == GameState.COUNTDOWN:
     game.reset()
 
-game_state = GameState(GameState.RUNNING, state_response)
+game_state = GameState(GameState.WHEEL, state_response)
 
 # render thing(s) (can't put this in game or hud?)
 counter = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)
