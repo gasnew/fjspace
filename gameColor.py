@@ -1,6 +1,8 @@
 class GameColor:
   White = (255, 255, 255)
   Shadow = (50, 50, 50)
+  Green = (0, 255, 0)
+  Red = (255, 0, 0)
   class F:
     Light = (221, 218, 199)
     Med = (206, 194, 136)

@@ -22,6 +22,8 @@ Visual Improvements
   + Down and gray when pressed and cannot space
 + Wheel
   + Draw hand as wedge?
+- Scoreboard looks bad and has bad design
+- Player list looks bad and has mediocre design
 
 Menu
 - At any time, hold [1] to view menu
@@ -35,7 +37,7 @@ Menu
 - While holding [1], hold a key and release [1] to activate functionality
 
 Game
-- WIN and LOSE text for game end
++ WIN and LOSE text for game end
 - Wheel
   - percentages next to wedges
   - animated wedge opening (pf, pj, and mag)
@@ -43,16 +45,17 @@ Game
 - End game if [SPACE] held for 6 seconds
 
 Hotseat Mode
-- Open game with two text boxes for names. Hit '+' to add more, '-' to subtract
-- Once begin, PLAYER vs. PLAYER
++ Open game with two text boxes for names. Hit '+' to add more, '-' to subtract
++ Once begin, PLAYER vs. PLAYER
   - Possibly include some stats here
-  - hold [F] and [J] to begin
-- Once bo5 over, show winner, and swap in next opponent
+  / hold [F] and [J] to begin
++ Once bo5 over, show winner, and swap in next opponent
 
 Scoreboard
-- Show all current players
-- Stats
-  - Score
-  - Wins
++ Show all current players
++ Stats (sorted by score, wins, then losses)
+  + Score
+  + Wins
+  + Losses
   - Games played
   - Times Spaced

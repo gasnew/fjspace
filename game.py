@@ -97,7 +97,7 @@ class Game:
     self.timer = self.TOTAL_TIME
     self.perc_f = self.perc_j = 0
 
-  def render_stuff(self, screen, render_space = True):
+  def render_stuff(self, screen, render_space = True, render_keys = True):
     # background rendering
     hsva = self.f_background_color.hsva
     self.fbc.hsva = (hsva[0], hsva[1], hsva[2] + (100 - hsva[2]) * self.f_spaced, hsva[3])
@@ -118,8 +118,9 @@ class Game:
     self.f_text.down = f
     self.j_text.down = j
     self.space_text.down = s or self.cooldown > 0
-    self.f_text.render(screen)
-    self.j_text.render(screen)
+    if render_keys:
+      self.f_text.render(screen)
+      self.j_text.render(screen)
 
     if render_space:
       self.space_text.render(screen)

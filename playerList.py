@@ -17,13 +17,17 @@ class Entry:
       self.shadow_dist = shadow_dist
       self.name = name
 
+      self.score = 0
+      self.wins = 0
+      self.losses = 0
+
       self.text = TextRenderer(sys_font, 4, center, shadow_dist)
 
     def render(self, screen):
       self.text.render(screen, self.name)
 
 class PlayerList:
-  def __init__(self, rect, sys_font, shadow_dist):
+  def __init__(self, rect, shadow_dist, sys_font):
     self.rect = rect
     self.sys_font = sys_font
     self.shadow_dist = shadow_dist
@@ -92,6 +96,16 @@ class PlayerList:
         self.removeEntry(self.list.index(self.selected))
 
     logging.debug(char)
+
+  def swap_players(self):
+    p_temp = self.pf
+    self.pf = self.pj
+    self.pj = p_temp
+
+  def new_opponent(self):
+    self.list.remove(self.pj)
+    self.list.append(self.pj)
+    self.pj = self.list[1]
 
   def render_stuff(self, screen): 
     screen.blit(self.background, self.rect.topleft)
