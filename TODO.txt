@@ -52,6 +52,7 @@ Hotseat Mode
 Scoreboard
 - Show all current players
 - Stats
+  - Score
   - Wins
   - Games played
   - Times Spaced

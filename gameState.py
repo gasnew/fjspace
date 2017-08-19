@@ -1,11 +1,12 @@
 import logging
 
 class GameState:
-  RUNNING = 0
-  WHEEL = 1
-  VICTORY = 2
-  COUNTDOWN = 3
-  STATE_TIMERS = [0, 2, 2, 3]
+  PLAYER_LIST = 0
+  RUNNING = 1
+  WHEEL = 2
+  VICTORY = 3
+  COUNTDOWN = 4
+  STATE_TIMERS = [0, 0, 2, 2, 3]
 
   def __init__(self, state, func):
     self.game_callback = func

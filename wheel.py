@@ -54,18 +54,19 @@ class Wheel:
     surface = pygame.Surface(Wheel.SIZE, pygame.SRCALPHA).convert_alpha()
     
     # draw wedges
-    pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(0.0, self.pf))
-    pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(self.pf, 1.0))
-    pygame.draw.polygon(surface, GameColor.F.Med, self.make_wedge(0.0, self.pf))
-    pygame.draw.polygon(surface, GameColor.J.Med, self.make_wedge(self.pf, 1.0))
+    try:
+      pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(0.0, self.pf))
+      pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(self.pf, 1.0))
+      pygame.draw.polygon(surface, GameColor.F.Med, self.make_wedge(0.0, self.pf))
+      pygame.draw.polygon(surface, GameColor.J.Med, self.make_wedge(self.pf, 1.0))
+    except:
+      logging.debug("WEDGIE ERROR, UGH: %s", sys.exc_info()[0])
+      raise
 
     # draw hand
     mag = Wheel.RES / 2
-    start = (Wheel.RES / 2, Wheel.RES / 2)
-    end = (start[0] + -mag * sin(2 * pi * self.arm_angle), start[1] + -mag * cos(2 * pi * self.arm_angle))
-    # pygame.draw.line(surface, GameColor.Shadow, start, end, 3)
     pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle))
-    pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle), 3)
+    pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle), 2)
 
     # scale and blit to screen
     shadow_surface = pygame.transform.scale(shadow_surface, self.rect.size)

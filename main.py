@@ -3,6 +3,7 @@
 import logging, sys
 import pygame
 from pygame.locals import *
+from playerList import PlayerList
 from game import Game
 from wheel import Wheel
 from keys import Keys
@@ -30,6 +31,8 @@ TOTAL_TIME = 35
 FAILURE_TIME = 0.5
 
 # visual params
+p_list_rect = pygame.Rect((screen.get_width() * 0.1, screen.get_height() * 0.1), (screen.get_width() * 0.8, screen.get_height() * 0.8))
+
 top_rect = pygame.Rect(0, 0, screen.get_width(), screen.get_height() * 0.2)
 top_rect_left = pygame.Rect(0, 0, screen.get_width() / 2, top_rect.height)
 top_rect_right = pygame.Rect(screen.get_width() / 2, 0, screen.get_width() / 2, top_rect.height)
@@ -45,6 +48,7 @@ f_wins = j_wins = 0
 
 # main classes
 keys = Keys()
+p_list = PlayerList(p_list_rect, sys_font, shadow_dist)
 game = Game(WIN_TIME, COOLDOWN_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font)
 wheel = Wheel(game_rect, shadow_dist, sys_font)
 hud = Hud(top_rect, bottom_rect, shadow_dist, sys_font)
@@ -54,9 +58,12 @@ def state_response(state):
   if state == GameState.COUNTDOWN:
     game.reset()
 
-game_state = GameState(GameState.WHEEL, state_response)
+game_state = GameState(GameState.PLAYER_LIST, state_response)
+p_list.focus()
 
 # render thing(s) (can't put this in game or hud?)
+name1 = TextRenderer(sys_font, 2, (top_rect_left.centerx, bottom_rect.centery), shadow_dist)
+name2 = TextRenderer(sys_font, 2, (top_rect_right.centerx, bottom_rect.centery), shadow_dist)
 counter = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)
 ready_text = TextRenderer(sys_font, 2, (game_rect.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
 win_rect_size = top_rect.width * 0.02
@@ -69,11 +76,14 @@ while 1:
   delta_t = clock.tick(60)
 
   # key stuff
-  keys.update(pygame.event.get([KEYDOWN, KEYUP]))
+  keys.update(pygame.event.get([KEYDOWN, KEYUP]), lambda char: p_list.input(char))
   for event in pygame.event.get():
     if event.type == QUIT:
       pygame.quit()
       sys.exit()
+
+  # player list stuff
+  p_list.p_list_stuff()
 
   # game stuff
   game_over = False
@@ -90,6 +100,10 @@ while 1:
 
   # state stuff
   game_state.update(delta_t)
+  if game_state.state == GameState.PLAYER_LIST and keys.enter:
+    game_state.set_state(GameState.RUNNING)
+    p_list.defocus()
+    game.reset()
   if game_over:
     if winner == "stale":
       game_state.set_state(GameState.WHEEL)
@@ -115,9 +129,15 @@ while 1:
   pygame.draw.rect(screen, GameColor.J.Med, top_rect_right)
   pygame.draw.rect(screen, GameColor.Shadow, bottom_rect)
 
+  name1.render(screen, p_list.pf.name)
+  name2.render(screen, p_list.pj.name)
+
   for rect in f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
   for rect in j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 
   hud.render_stuff(screen, game.timer, game.perc_f, game.perc_j, render_percs = game_state.state == GameState.RUNNING)
+
+  if game_state.state == GameState.PLAYER_LIST:
+    p_list.render_stuff(screen)
 
   pygame.display.flip()
