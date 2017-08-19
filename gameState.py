@@ -8,7 +8,7 @@ class GameState:
   WHEEL = 4
   VICTORY = 5
   WINNER = 6
-  STATE_TIMERS = [0, 0, 3, 0, 2, 2, 3]
+  STATE_TIMERS = [0, 0, 3, 0, 2, 2, 4]
 
   def __init__(self, state, func):
     self.game_callback = func

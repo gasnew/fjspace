@@ -50,8 +50,6 @@ class PlayerList:
     self.background.fill((0, 0, 0, 50))
     self.bounding_rect = pygame.Rect((edge_buffer, edge_buffer), (self.background.get_width() - edge_buffer * 2, self.background.get_height() - edge_buffer * 2))
     self.player_rect = pygame.Rect((self.bounding_rect.centerx - player_rect_width / 2, self.bounding_rect.top), (player_rect_width, max_text_size[1]))
-    # self.select_rect = pygame.Surface(self.selected.font_size, pygame.SRCALPHA)
-    # self.select_rect.fill((0, 0, 0, 150))
 
     # list stuff
     self.list = []
@@ -79,18 +77,10 @@ class PlayerList:
 
     self.list.append(Entry(self.sys_font, self.shadow_dist, name, color = color))
     self.selected = self.list[-1]
-    self.place_entries()
 
   def removeEntry(self, idx):
     del self.list[idx]
     self.selected = self.list[idx] if idx < len(self.list) else self.list[-1]
-    self.place_entries()
-
-  def place_entries(self):
-    pass
-    # dist = self.bounding_rect.height / len(self.list)
-    # for idx, player in enumerate(self.list):
-    #   player.text.center = (self.rect.centerx, self.rect.top + idx * dist + dist / 2)
 
   def input(self, char):
     if self.in_focus:
@@ -111,8 +101,6 @@ class PlayerList:
         self.addEntry()
       elif char == 45 and len(self.list) > 2: # -
         self.removeEntry(self.list.index(self.selected))
-
-    logging.debug(char)
 
   def shuffle(self):
     random.shuffle(self.list)

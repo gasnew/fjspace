@@ -23,7 +23,8 @@ Visual Improvements
 + Wheel
   + Draw hand as wedge?
 - Scoreboard looks bad and has bad design
-- Player list looks bad and has mediocre design
+- Player list looks okay and has mediocre design
++ Players have colors
 
 Menu
 - At any time, hold [1] to view menu
@@ -48,7 +49,7 @@ Hotseat Mode
 + Open game with two text boxes for names. Hit '+' to add more, '-' to subtract
 + Once begin, PLAYER vs. PLAYER
   - Possibly include some stats here
-  / hold [F] and [J] to begin
+  + hold [F] and [J] to begin
 + Once bo5 over, show winner, and swap in next opponent
 
 Scoreboard

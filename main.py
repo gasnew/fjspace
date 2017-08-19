@@ -28,7 +28,7 @@ sys_font = pygame.font.Font("C:\Windows\Fonts\8514oem.fon", 100)
 # ---- THE GAME ITSELF ---- #
 # gameplay params
 AGREE_TIME = 0.5
-WIN_TIME = 1
+WIN_TIME = 6
 COOLDOWN_TIME = 2
 TOTAL_TIME = 35
 FAILURE_TIME = 0.5
@@ -97,8 +97,8 @@ def state_response(state):
 
     game.reset()
 
-game_state = GameState(GameState.NEW_OPPONENT, state_response)
-# p_list.focus()
+game_state = GameState(GameState.PLAYER_LIST, state_response)
+p_list.focus()
 
 # render thing(s) (can't put this in game or hud?)
 namef = TextRenderer(sys_font, 2, (top_rect_left.centerx, bottom_rect.centery), shadow_dist)
@@ -222,7 +222,7 @@ while 1:
   for rect in f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
   for rect in j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 
-  hud.render_stuff(screen, game.timer, game.perc_f, game.perc_j, render_percs = game_state.state == GameState.RUNNING)
+  hud.render_stuff(screen, game.timer, game.perc_f, game.perc_j, render_percs = game_state.state in {GameState.RUNNING, GameState.WHEEL})
 
   if game_state.state == GameState.PLAYER_LIST:
     p_list.render_stuff(screen)

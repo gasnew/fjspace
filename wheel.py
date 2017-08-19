@@ -30,6 +30,8 @@ class Wheel:
     self.winning_angle = self.arm_angle = self.prev_arm_angle = self.arm_v0 = self.t_elapsed = 0.0
 
   def start(self, spin_time, pf, pj):
+    self.reset()
+
     self.spin_time = spin_time
     self.pf = pf
     self.pj = pj
@@ -37,9 +39,6 @@ class Wheel:
     self.winning_angle = random.random()
     final_angle = self.winning_angle + Wheel.REVOLUTIONS
     self.arm_v0 = 2 * final_angle / spin_time
-
-    self.prev_arm_angle = 0
-    self.t_elapsed = 0.0
 
   def wheel_stuff(self, delta_t):
     self.t_elapsed += (delta_t / 1000)
@@ -53,20 +52,19 @@ class Wheel:
     shadow_surface = pygame.Surface(Wheel.SIZE, pygame.SRCALPHA).convert_alpha()
     surface = pygame.Surface(Wheel.SIZE, pygame.SRCALPHA).convert_alpha()
     
-    # draw wedges
-    try:
-      pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(0.0, self.pf))
-      pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(self.pf, 1.0))
-      pygame.draw.polygon(surface, GameColor.F.Med, self.make_wedge(0.0, self.pf))
-      pygame.draw.polygon(surface, GameColor.J.Med, self.make_wedge(self.pf, 1.0))
-    except:
-      logging.debug("WEDGIE ERROR, UGH: %s", sys.exc_info()[0])
-      raise
+    # draw wedges  
+    pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(0.0, self.pf))
+    pygame.draw.polygon(shadow_surface, GameColor.Shadow, self.make_wedge(self.pf, 1.0))
+    pygame.draw.polygon(surface, GameColor.F.Med, self.make_wedge(0.0, self.pf))
+    pygame.draw.polygon(surface, GameColor.J.Med, self.make_wedge(self.pf, 1.0))
 
     # draw hand
-    mag = Wheel.RES / 2
-    pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle))
-    pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle), 2)
+    try:
+      mag = Wheel.RES / 2
+      pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle))
+      pygame.draw.polygon(surface, GameColor.Shadow, self.make_wedge(self.prev_arm_angle, self.arm_angle), 2)
+    except:
+      logging.debug("ERROR")
 
     # scale and blit to screen
     shadow_surface = pygame.transform.scale(shadow_surface, self.rect.size)
