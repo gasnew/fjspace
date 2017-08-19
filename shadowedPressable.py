@@ -1,5 +1,6 @@
 import logging
 import pygame
+from pygame.locals import *
 from gameColor import GameColor
 
 class ShadowedPressable:
@@ -23,9 +24,21 @@ class ShadowedPressable:
 
     self.down = False
 
-  def render(self, target):
+    self.cover = pygame.Surface((self.surface.get_width(), self.surface.get_height())).convert_alpha()
+    self.cover.fill(GameColor.Space.Down)
+
+  def render(self, target, cooldown = 0, cover = False):
     if self.down:
       target.blit(self.surface, self.top_left)
     else:
       target.blit(self.shadow, self.top_left)
       target.blit(self.surface, tuple(coord - self.shadow_dist for coord in self.top_left))
+
+    # render mask
+    if cooldown > 0 or cover:
+      cover_size = cooldown if cooldown > 0 else 1
+      disp = 0 if self.down else self.shadow_dist
+
+      cover_masked = pygame.transform.scale(self.cover.copy(), (self.cover.get_width(), int(self.cover.get_height() * cover_size)))
+      cover_masked.blit(self.surface, (0, 0), special_flags = BLEND_RGBA_MULT)
+      target.blit(cover_masked, (self.top_left[0] - disp, self.top_left[1] - disp))

@@ -27,13 +27,16 @@ sys_font = pygame.font.Font("C:\Windows\Fonts\8514oem.fon", 100)
 
 # ---- THE GAME ITSELF ---- #
 # gameplay params
+AGREE_TIME = 0.5
 WIN_TIME = 1
 COOLDOWN_TIME = 2
 TOTAL_TIME = 35
 FAILURE_TIME = 0.5
+NUM_WINS = 3
 
 # visual params
-p_list_rect = pygame.Rect((screen.get_width() * 0.1, screen.get_height() * 0.1), (screen.get_width() * 0.8, screen.get_height() * 0.8))
+p_list_rect = pygame.Rect((0, 0), (screen.get_width(), screen.get_height()))
+# p_list_rect = pygame.Rect((screen.get_width() * 0.1, screen.get_height() * 0.1), (screen.get_width() * 0.8, screen.get_height() * 0.8))
 scoreboard_rect = pygame.Rect((screen.get_width() * 0.1, screen.get_height() * 0.1), (screen.get_width() * 0.8, screen.get_height() * 0.8))
 
 top_rect = pygame.Rect(0, 0, screen.get_width(), screen.get_height() * 0.2)
@@ -47,6 +50,7 @@ bottom_rect = pygame.Rect(0, game_rect.bottom, screen.get_width(), screen.get_he
 shadow_dist = screen.get_width() * 0.005
 
 # gameplay values
+big_f_agree = big_j_agree = 0
 f_wins = j_wins = 0
 score_streak = 0
 
@@ -60,10 +64,10 @@ scoreboard = Scoreboard(scoreboard_rect, shadow_dist, sys_font, p_list)
 
 # state stuff
 def state_response(state):
-  global f_wins, j_wins, score_streak, f_win_rects, j_win_rects, game
+  global big_f_agree, big_j_agree, f_wins, j_wins, score_streak, f_win_rects, j_win_rects, game
 
   if state == GameState.COUNTDOWN:
-    if 3 in {f_wins, j_wins}:
+    if NUM_WINS in {f_wins, j_wins}:
       game_state.set_state(GameState.WINNER)
       wlf.color = GameColor.Green if winner == "f" else GameColor.Red
       wlj.color = GameColor.Green if winner == "j" else GameColor.Red
@@ -79,19 +83,22 @@ def state_response(state):
     else:
       game.reset()
   elif state == GameState.NEW_OPPONENT:
-    if j_wins == 3:
+    if j_wins == NUM_WINS:
       p_list.swap_players()
     if not f_wins == j_wins == 0:
       p_list.new_opponent()
+    else:
+      p_list.shuffle()
 
+    big_f_agree = big_j_agree = 1
     f_wins = j_wins = 0
     f_win_rects = []
     j_win_rects = []
 
     game.reset()
 
-game_state = GameState(GameState.PLAYER_LIST, state_response)
-p_list.focus()
+game_state = GameState(GameState.NEW_OPPONENT, state_response)
+# p_list.focus()
 
 # render thing(s) (can't put this in game or hud?)
 namef = TextRenderer(sys_font, 2, (top_rect_left.centerx, bottom_rect.centery), shadow_dist)
@@ -101,14 +108,15 @@ big_namej = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.centery
 vs = TextRenderer(sys_font, 2, game_rect.center, shadow_dist)
 
 big_f, big_f_shadow = ShadowedPressable.make_pressable_key("[F]", sys_font, 4)
-big_f = ShadowedPressable(big_f, big_f_shadow, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
+big_f = ShadowedPressable(big_f.convert_alpha(), big_f_shadow, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
 big_j, big_j_shadow = ShadowedPressable.make_pressable_key("[J]", sys_font, 4)
-big_j = ShadowedPressable(big_j, big_j_shadow, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
+big_j = ShadowedPressable(big_j.convert_alpha(), big_j_shadow, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
 
 counter = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)
 ready_text = TextRenderer(sys_font, 2, (game_rect.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
 win_rect_size = top_rect.width * 0.02
 win_rect = Rect(top_rect.centerx - win_rect_size / 2, win_rect_size, win_rect_size, win_rect_size)
+win_rect_shadows = [win_rect.move(win_rect.width * 2 * idx, 0) for idx in [-3, -2, -1, 1, 2, 3]]
 f_win_rects = []
 j_win_rects = []
 
@@ -144,13 +152,21 @@ while 1:
   # hud stuff
   hud.hud_stuff()
 
+  # non-hud weird stuff
+  if game_state.state == GameState.NEW_OPPONENT:
+    if keys.f: big_f_agree = big_f_agree - (delta_t / (AGREE_TIME * 1000)) if big_f_agree > 0 else 0
+    else: big_f_agree = 1
+    
+    if keys.j: big_j_agree = big_j_agree - (delta_t / (AGREE_TIME * 1000)) if big_j_agree > 0 else 0
+    else: big_j_agree = 1
+
   # state stuff
   game_state.update(delta_t)
   if game_state.state == GameState.PLAYER_LIST and keys.enter:
     game_state.set_state(GameState.NEW_OPPONENT)
     p_list.defocus()
     game.reset()
-  elif game_state.state == GameState.NEW_OPPONENT and keys.f and keys.j:
+  elif game_state.state == GameState.NEW_OPPONENT and keys.f and keys.j and big_f_agree == big_j_agree == 0:
     game_state.set_state(GameState.COUNTDOWN)
   elif game_over:
     if winner == "stale":
@@ -163,12 +179,12 @@ while 1:
         p_list.pf.wins += 1
         p_list.pj.losses += 1
 
-        f_win_rects.append(win_rect.move(-(win_rect.width * 2) * f_wins, 0))
+        f_win_rects.append(win_rect.move(-(win_rect.width * 2) * f_wins - shadow_dist, -shadow_dist))
       else:
         j_wins += 1
         p_list.pj.wins += 1
         p_list.pf.losses += 1
-        j_win_rects.append(win_rect.move((win_rect.width * 2) * j_wins, 0))
+        j_win_rects.append(win_rect.move((win_rect.width * 2) * j_wins - shadow_dist, -shadow_dist))
 
   # render stuff
   game.render_stuff(screen, render_space = game_state.state == GameState.RUNNING, render_keys = game_state.state != GameState.NEW_OPPONENT)
@@ -182,18 +198,18 @@ while 1:
   pygame.draw.rect(screen, GameColor.J.Med, top_rect_right)
   pygame.draw.rect(screen, GameColor.Shadow, bottom_rect)
 
-  namef.render(screen, p_list.pf.name)
-  namej.render(screen, p_list.pj.name)
+  namef.render(screen, p_list.pf.name, GameColor.lighten(p_list.pf.color))
+  namej.render(screen, p_list.pj.name, GameColor.lighten(p_list.pj.color))
 
   if game_state.state == GameState.NEW_OPPONENT:
-    big_namef.render(screen, p_list.pf.name)
-    big_namej.render(screen, p_list.pj.name)
+    big_namef.render(screen, p_list.pf.name, p_list.pf.color)
+    big_namej.render(screen, p_list.pj.name, p_list.pj.color)
     vs.render(screen, "VS")
 
     big_f.down = keys.f
     big_j.down = keys.j
-    big_f.render(screen)
-    big_j.render(screen)
+    big_f.render(screen, big_f_agree)
+    big_j.render(screen, big_j_agree)
 
   if game_state.state == GameState.WINNER:
     wlf.render(screen, "WIN" if winner == "f" else "LOSE")
@@ -202,6 +218,7 @@ while 1:
     pmf.render(screen, "+{0}".format(score_streak) if winner == "f" else "")
     pmj.render(screen, "+1" if winner == "j" else "")
 
+  for rect in win_rect_shadows: pygame.draw.rect(screen, GameColor.Shadow, rect)
   for rect in f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
   for rect in j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 

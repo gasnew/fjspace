@@ -50,9 +50,6 @@ class Game:
     space_text_shadow = pygame.transform.rotate(space_text_shadow, 90).convert_alpha()
     self.space_text = ShadowedPressable(space_text, space_text_shadow, (game_rect.width / 2, game_rect.height * 0.8), shadow_dist)
 
-    self.space_text_cover = pygame.Surface((self.space_text.surface.get_width(), self.space_text.surface.get_height())).convert_alpha()
-    self.space_text_cover.fill(GameColor.Space.Down)
-
     # -- GAMEPLAY --
     self.reset()
     
@@ -123,12 +120,4 @@ class Game:
       self.j_text.render(screen)
 
     if render_space:
-      self.space_text.render(screen)
-      
-      if self.cooldown > 0 or (not f and not j):
-        cover_size = self.cooldown if self.cooldown > 0 else 1
-        disp = 0 if self.space_text.down else self.shadow_dist
-
-        self.space_text_cover_masked = pygame.transform.scale(self.space_text_cover.copy(), (self.space_text_cover.get_width(), int(self.space_text_cover.get_height() * cover_size)))
-        self.space_text_cover_masked.blit(self.space_text.surface, (0, 0), special_flags = BLEND_RGBA_MULT)
-        screen.blit(self.space_text_cover_masked, (self.space_text.top_left[0] - disp, self.space_text.top_left[1] - disp))
+      self.space_text.render(screen, self.cooldown, not f and not j)

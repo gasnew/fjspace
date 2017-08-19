@@ -24,7 +24,7 @@ class Hud:
 
     # percentage
     if render_percs:
-      perc_f_str = str(round(perc_f * 100)).split('.')[0] + '%'
+      perc_f_str = str(round(perc_f * 100)).split('.')[0] + '%' 
       self.perc_f_text.render(screen, perc_f_str)
       perc_j_str = str(round(perc_j * 100)).split('.')[0] + '%'
       self.perc_j_text.render(screen, perc_j_str)

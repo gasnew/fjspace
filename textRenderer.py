@@ -10,6 +10,7 @@ class TextRenderer:
     self.shadow_dist = shadow_dist
     self.color = color
 
-  def render(self, target, string):
-    text, shadow = ShadowedPressable.make_pressable_key(string, self.font, self.scale, color = self.color)
+  def render(self, target, string, color = None):
+    if color is None: color = self.color
+    text, shadow = ShadowedPressable.make_pressable_key(string, self.font, self.scale, color = color)
     ShadowedPressable(text, shadow, self.center, self.shadow_dist).render(target)
