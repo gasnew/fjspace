@@ -28,7 +28,7 @@ class Scoreboard:
 
     screen.blit(self.background, self.rect.topleft)
 
-    name_size = self.sys_font.size("AAAAAAAAAA")
+    name_size = self.sys_font.size("AAAAAAAAAAAAAA")
     num_dist = self.sys_font.size("AAAA")[0]
 
     # name

@@ -19,8 +19,11 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 # includes critical, error, warning, info, debug :)
 
 # init pygame whatnot
+RESOLUTION = (640, 480)
 pygame.init()
-screen = pygame.display.set_mode((640, 480))
+screen = pygame.display.set_mode(RESOLUTION)
+logging.debug(pygame.display.get_wm_info())
+
 clock = pygame.time.Clock()
 
 sys_font = pygame.font.Font("C:\Windows\Fonts\8514oem.fon", 100)
@@ -30,13 +33,13 @@ sys_font = pygame.font.Font("C:\Windows\Fonts\8514oem.fon", 100)
 AGREE_TIME = 0.5
 WIN_TIME = 6
 COOLDOWN_TIME = 2
+STALE_TIME = 5
 TOTAL_TIME = 35
 FAILURE_TIME = 0.5
 NUM_WINS = 3
 
 # visual params
 p_list_rect = pygame.Rect((0, 0), (screen.get_width(), screen.get_height()))
-# p_list_rect = pygame.Rect((screen.get_width() * 0.1, screen.get_height() * 0.1), (screen.get_width() * 0.8, screen.get_height() * 0.8))
 scoreboard_rect = pygame.Rect((screen.get_width() * 0.1, screen.get_height() * 0.1), (screen.get_width() * 0.8, screen.get_height() * 0.8))
 
 top_rect = pygame.Rect(0, 0, screen.get_width(), screen.get_height() * 0.2)
@@ -57,7 +60,7 @@ score_streak = 0
 # main classes
 keys = Keys()
 p_list = PlayerList(p_list_rect, shadow_dist, sys_font)
-game = Game(WIN_TIME, COOLDOWN_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font)
+game = Game(WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font)
 wheel = Wheel(game_rect, shadow_dist, sys_font)
 hud = Hud(top_rect, bottom_rect, shadow_dist, sys_font)
 scoreboard = Scoreboard(scoreboard_rect, shadow_dist, sys_font, p_list)
@@ -103,6 +106,7 @@ p_list.focus()
 # render thing(s) (can't put this in game or hud?)
 namef = TextRenderer(sys_font, 2, (top_rect_left.centerx, bottom_rect.centery), shadow_dist)
 namej = TextRenderer(sys_font, 2, (top_rect_right.centerx, bottom_rect.centery), shadow_dist)
+streak_text = TextRenderer(sys_font, 1, (bottom_rect.width * 0.08, bottom_rect.centery + bottom_rect.height * 0.25), shadow_dist)
 big_namef = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.centery), shadow_dist, GameColor.F.Dark)
 big_namej = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.centery), shadow_dist, GameColor.J.Dark)
 vs = TextRenderer(sys_font, 2, game_rect.center, shadow_dist)
@@ -135,6 +139,13 @@ while 1:
     if event.type == QUIT:
       pygame.quit()
       sys.exit()
+  if keys.alt and keys.f4:
+    pygame.quit()
+    sys.exit()
+  if keys.f11_toggle and not (screen.get_flags() & pygame.FULLSCREEN):
+    pygame.display.set_mode(RESOLUTION, pygame.FULLSCREEN)
+  elif not keys.f11_toggle and screen.get_flags() & pygame.FULLSCREEN:
+    pygame.display.set_mode(RESOLUTION)
 
   # player list stuff
   p_list.p_list_stuff()
@@ -200,6 +211,7 @@ while 1:
 
   namef.render(screen, p_list.pf.name, GameColor.lighten(p_list.pf.color))
   namej.render(screen, p_list.pj.name, GameColor.lighten(p_list.pj.color))
+  streak_text.render(screen, "streak:{0}".format(score_streak))
 
   if game_state.state == GameState.NEW_OPPONENT:
     big_namef.render(screen, p_list.pf.name, p_list.pf.color)

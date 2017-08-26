@@ -5,12 +5,14 @@ import pygame
 from pygame.locals import *
 from gameColor import GameColor
 from shadowedPressable import *
+from textRenderer import TextRenderer
 
 class Game:
-  def __init__(self, WIN_TIME, COOLDOWN_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font):
+  def __init__(self, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font):
     # -- CONSTANTS --
     self.WIN_TIME = WIN_TIME
     self.COOLDOWN_TIME = COOLDOWN_TIME
+    self.STALE_TIME = STALE_TIME
     self.TOTAL_TIME = TOTAL_TIME
     self.FAILURE_TIME = FAILURE_TIME
 
@@ -50,12 +52,16 @@ class Game:
     space_text_shadow = pygame.transform.rotate(space_text_shadow, 90).convert_alpha()
     self.space_text = ShadowedPressable(space_text, space_text_shadow, (game_rect.width / 2, game_rect.height * 0.8), shadow_dist)
 
+    # text
+    self.big_timer = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)
+
     # -- GAMEPLAY --
     self.reset()
     
   def game_stuff(self, delta_t):
     # mechanics stuff
     self.cooldown = self.cooldown - (delta_t / (self.COOLDOWN_TIME * 1000)) if self.cooldown > 0 else 0
+    if self.keys.s and self.cooldown == 0: self.stale_timer = self.stale_timer - (delta_t / 1000) if self.stale_timer > 0 else 0
     self.timer = self.timer - (delta_t / 1000) if self.timer > 0 else 0
     if self.bf + self.bj == 0:
       self.perc_f = self.perc_j = 0.5
@@ -77,12 +83,15 @@ class Game:
         self.j_spaced = 1
       else: self.bj += delta_t / (self.WIN_TIME * 1000)
 
-    if s and (f or j) and self.cooldown == 0: self.cooldown = 1
+    if s and (f or j) and self.cooldown == 0:
+        self.cooldown = 1
+    elif not s or self.cooldown != 0:
+      self.stale_timer = min([self.STALE_TIME, self.timer])
 
     # returns
-    game_over = self.bf >= 1 or self.bj >= 1 or self.timer == 0
+    game_over = self.bf >= 1 or self.bj >= 1 or self.timer == 0 or self.stale_timer == 0
     winner = "j"
-    if self.timer == 0: winner = "stale"
+    if self.timer == 0 or self.stale_timer == 0: winner = "stale"
     elif self.bf > self.bj: winner = "f"
 
     return game_over, winner, self.perc_f, self.perc_j
@@ -91,6 +100,7 @@ class Game:
     self.bf = self.bj = 0
     self.cooldown = 0
     self.f_spaced = self.j_spaced = 0
+    self.stale_timer = self.STALE_TIME
     self.timer = self.TOTAL_TIME
     self.perc_f = self.perc_j = 0
 
@@ -121,3 +131,6 @@ class Game:
 
     if render_space:
       self.space_text.render(screen, self.cooldown, not f and not j)
+
+      if self.stale_timer < 3:
+        self.big_timer.render(screen, str(self.stale_timer)[:4])
