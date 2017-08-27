@@ -11,6 +11,7 @@ from matchState import MatchState
 from textRenderer import TextRenderer
 from shadowedPressable import ShadowedPressable
 from gameColor import GameColor
+from tweener import Tweener
 
 class Match:
   def __init__(self, AGREE_TIME, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, NUM_WINS,
@@ -38,30 +39,47 @@ class Match:
     self.match_state = MatchState(MatchState.PLAYER_LIST, self.state_response)
 
     # -- RENDERING --
+    # bottom bar
     self.f_name_text = TextRenderer(sys_font, 2, (top_rect_left.centerx, bottom_rect.centery), shadow_dist)
     self.j_name_text = TextRenderer(sys_font, 2, (top_rect_right.centerx, bottom_rect.centery), shadow_dist)
     self.streak_text = TextRenderer(sys_font, 1, (bottom_rect.width * 0.08, bottom_rect.centery + bottom_rect.height * 0.25), shadow_dist)
-    self.f_name_big_text = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.centery), shadow_dist, GameColor.F.Dark)
-    self.j_name_big_text = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.centery), shadow_dist, GameColor.J.Dark)
-    self.vs_text = TextRenderer(sys_font, 2, game_rect.center, shadow_dist)
+    
+    # vs
+    self.vs_left_bar = Rect((0, game_rect.y + game_rect.height / 4), (top_rect_left.width, game_rect.height / 5))
+    self.vs_right_bar = Rect((game_rect.centerx, self.vs_left_bar.bottom), (self.vs_left_bar.width, self.vs_left_bar.height))
+    vs_par_width = game_rect.height / 7
+    self.vs_parallelogram = ((game_rect.centerx, self.vs_left_bar.top), (game_rect.centerx - vs_par_width, self.vs_right_bar.bottom), (game_rect.centerx, self.vs_right_bar.bottom), (game_rect.centerx + vs_par_width, self.vs_left_bar.top))
+    self.f_name_big_text = TextRenderer(sys_font, 4, (top_rect_left.centerx + shadow_dist, self.vs_left_bar.centery + shadow_dist), shadow_dist, GameColor.F.Dark)
+    self.j_name_big_text = TextRenderer(sys_font, 4, (top_rect_right.centerx + shadow_dist, self.vs_right_bar.centery + shadow_dist), shadow_dist, GameColor.J.Dark)
+    self.vs_text = TextRenderer(sys_font, 2, (game_rect.centerx + shadow_dist, self.vs_left_bar.bottom + shadow_dist), shadow_dist)
+    self.vs_left_bar.move_ip((top_rect_left.width, 0))
 
     big_f, big_f_shadow = ShadowedPressable.make_pressable_key("[F]", sys_font, 4)
     self.big_f = ShadowedPressable(big_f.convert_alpha(), big_f_shadow, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
     big_j, big_j_shadow = ShadowedPressable.make_pressable_key("[J]", sys_font, 4)
     self.big_j = ShadowedPressable(big_j.convert_alpha(), big_j_shadow, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
 
+    # counter
     self.counter = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)
     self.ready_text = TextRenderer(sys_font, 2, (game_rect.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
+
+    # win rects
     win_rect_size = top_rect.width * 0.02
     self.win_rect = Rect(top_rect.centerx - win_rect_size / 2, win_rect_size, win_rect_size, win_rect_size)
     self.win_rect_shadows = [self.win_rect.move(self.win_rect.width * 2 * idx, 0) for idx in [-3, -2, -1, 1, 2, 3]]
     self.f_win_rects = []
     self.j_win_rects = []
 
+    # win text
     self.f_win_loss_text = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
     self.j_win_loss_text = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
     self.f_plus_minus_text = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.65), shadow_dist)
     self.j_plus_minus_text = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.65), shadow_dist)
+
+    # tweens
+    self.vs_bar_w = Tweener({"retracted": 0, "extended": top_rect_left.width}, "retracted")
+    self.f_name_big_x = Tweener({"out": 0, "in": self.f_name_big_text.center[0]}, "out")
+    self.j_name_big_x = Tweener({"out": game_rect.right, "in": self.j_name_big_text.center[0]}, "out")
 
     # -- SOUND --
     self.vs_sound = pygame.mixer.Sound("SFX/VS.wav")
@@ -115,6 +133,10 @@ class Match:
       self.j_win_rects = []
 
       self.game.reset()
+
+      self.vs_bar_w.set_to("retracted").tween_to("extended", schmaltz = 50)
+      self.f_name_big_x.set_to("out").tween_to("in", schmaltz = 300)
+      self.j_name_big_x.set_to("out").tween_to("in", schmaltz = 300)
 
       self.vs_sound.play()
     elif state == MatchState.WHEEL:
@@ -172,6 +194,11 @@ class Match:
         self.match_state.set_state(MatchState.WHEEL)
       else:
         self.match_state.set_state(MatchState.VICTORY_0)
+
+    # tween stuff
+    self.vs_bar_w.tween_stuff(delta_t)
+    self.f_name_big_x.tween_stuff(delta_t)
+    self.j_name_big_x.tween_stuff(delta_t)
     
   def render_stuff(self, screen):
     self.game.render_stuff(screen, render_space = self.match_state.state == MatchState.RUNNING, render_keys = self.match_state.state != MatchState.NEW_OPPONENT)
@@ -190,7 +217,15 @@ class Match:
     self.streak_text.render(screen, "streak:{0}".format(self.score_streak))
 
     if self.match_state.state == MatchState.NEW_OPPONENT:
+      self.vs_left_bar.width = -self.vs_bar_w.tweened_val
+      self.vs_right_bar.width = self.vs_bar_w.tweened_val
+      pygame.draw.rect(screen, GameColor.White, self.vs_left_bar)
+      pygame.draw.rect(screen, GameColor.White, self.vs_right_bar)
+      pygame.draw.polygon(screen, GameColor.Shadow, self.vs_parallelogram)
+
+      self.f_name_big_text.center = (self.f_name_big_x.tweened_val, self.f_name_big_text.center[1])
       self.f_name_big_text.render(screen, self.p_list.pf.name, self.p_list.pf.color)
+      self.j_name_big_text.center = (self.j_name_big_x.tweened_val, self.j_name_big_text.center[1])
       self.j_name_big_text.render(screen, self.p_list.pj.name, self.p_list.pj.color)
       self.vs_text.render(screen, "VS")
 
