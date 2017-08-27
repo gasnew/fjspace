@@ -5,12 +5,12 @@ Bugs
 + can draw infinitesimal wedges
 
 Sound Effects
-/ VS
++ VS
 / Increment
-/ Spaced
++ Spaced
 - Hold button
-/ Climax
-/ Celebrate
++ Climax
++ Celebrate
 / WIN
 - Tip
 - Tap?
@@ -26,6 +26,9 @@ New Classes
   - .val
   - .set_to_waypoint("win_place")
   - .draw_val
+
+Code Refactoring
+- Migrate lots of Match's rendering code to HUD
 
 Visual Improvements
 + [SPACE] states

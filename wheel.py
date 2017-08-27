@@ -47,7 +47,7 @@ class Wheel:
 
     return (self.t_elapsed >= self.spin_time, "f" if self.winning_angle < self.pf else "j")
 
-  def render(self, screen, delta_t):
+  def render(self, screen):
     # get surface
     shadow_surface = pygame.Surface(Wheel.SIZE, pygame.SRCALPHA).convert_alpha()
     surface = pygame.Surface(Wheel.SIZE, pygame.SRCALPHA).convert_alpha()

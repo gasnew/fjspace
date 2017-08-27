@@ -1,6 +1,6 @@
 import logging
 
-class GameState:
+class MatchState:
   PLAYER_LIST = 0
   NEW_OPPONENT = 1
   COUNTDOWN = 2
@@ -19,13 +19,13 @@ class GameState:
     self.state_timer = self.state_timer - (delta_t / 1000) if self.state_timer > 0 else 0
 
     if self.state_timer == 0:
-      if self.state == GameState.COUNTDOWN: self.set_state(GameState.RUNNING)
-      elif self.state == GameState.WHEEL: self.set_state(GameState.VICTORY)
-      elif self.state == GameState.VICTORY: self.set_state(GameState.COUNTDOWN)
-      elif self.state == GameState.WINNER: self.set_state(GameState.NEW_OPPONENT)
+      if self.state == MatchState.COUNTDOWN: self.set_state(MatchState.RUNNING)
+      elif self.state == MatchState.WHEEL: self.set_state(MatchState.VICTORY)
+      elif self.state == MatchState.VICTORY: self.set_state(MatchState.COUNTDOWN)
+      elif self.state == MatchState.WINNER: self.set_state(MatchState.NEW_OPPONENT)
 
   def set_state(self, state):
     self.state = state
-    self.state_timer = GameState.STATE_TIMERS[state]
+    self.state_timer = MatchState.STATE_TIMERS[state]
 
     self.game_callback(state)
