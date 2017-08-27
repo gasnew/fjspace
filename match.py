@@ -65,6 +65,7 @@ class Match:
 
     # -- SOUND --
     self.vs_sound = pygame.mixer.Sound("SFX/VS.wav")
+    self.timer_sound = pygame.mixer.Sound("SFX/beep.wav")
     self.begin_sound = pygame.mixer.Sound("SFX/begin_game.wav")
     self.climax_sound = pygame.mixer.Sound("SFX/climax.wav")
     self.victory_sounds = [pygame.mixer.Sound("SFX/vic{0}.wav".format(i)) for i in range(3)]
@@ -98,6 +99,7 @@ class Match:
       else:
         self.game.reset()
         self.begin_sound.play()
+        self.timer_sound.play(loops = 2)
     elif state == MatchState.NEW_OPPONENT:
       if self.j_wins == self.NUM_WINS:
         self.p_list.swap_players()
@@ -138,20 +140,20 @@ class Match:
     # player list stuff
     self.p_list.p_list_stuff()
 
-    # self.game stuff
+    # game stuff
     game_over = False
     perc_f = perc_j = 0
     if self.match_state.state == MatchState.RUNNING:
       game_over, self.winner, perc_f, perc_j = self.game.game_stuff(delta_t)
 
-    # self.wheel stuff
+    # wheel stuff
     if self.match_state.state == MatchState.WHEEL:
       game_over, self.winner = self.wheel.wheel_stuff(delta_t)
 
-    # self.hud stuff
+    # hud stuff
     self.hud.hud_stuff()
 
-    # non-self.hud weird stuff
+    # non-hud weird stuff
     if self.match_state.state == MatchState.NEW_OPPONENT:
       if self.keys.f: self.big_f_agree = self.big_f_agree - (delta_t / (self.AGREE_TIME * 1000)) if self.big_f_agree > 0 else 0
       else: self.big_f_agree = 1

@@ -14,6 +14,7 @@ Sound Effects
 + WIN
 + Tip
 + Tap?
++ Timer beep
 - Wheel
 
 New Classes

@@ -58,6 +58,7 @@ class Game:
     # sound
     self.spaced_sound = pygame.mixer.Sound("SFX/spaced.wav")
     self.inc_sounds = [pygame.mixer.Sound("SFX/inc{0}.wav".format(i)) for i in range(13)]
+    self.timer_sound = pygame.mixer.Sound("SFX/beep.wav")
 
     # -- GAMEPLAY --
     self.reset()
@@ -92,13 +93,17 @@ class Game:
         self.bj += delta_t / (self.WIN_TIME * 1000)
 
     if s and (f or j) and self.cooldown == 0:
-        self.cooldown = 1
+      self.cooldown = 1
     elif not s or self.cooldown != 0:
       self.stale_timer = min([self.STALE_TIME, self.timer])
 
     # sound
-    # self.f_inc_channel = self.play_inc_sound(self.f_inc_channel, f, self.bf)
-    # self.j_inc_channel = self.play_inc_sound(self.j_inc_channel, j, self.bj)
+    if self.stale_timer < 3:
+      if self.stale_timer_channel is None:
+        self.stale_timer_channel = self.timer_sound.play(loops = 2)
+    elif self.stale_timer_channel is not None:
+      self.stale_timer_channel.stop()
+      self.stale_timer_channel = None
     
     # returns
     game_over = self.bf >= 1 or self.bj >= 1 or self.timer == 0 or self.stale_timer == 0
@@ -108,24 +113,6 @@ class Game:
 
     return game_over, winner, self.perc_f, self.perc_j
 
-  def play_inc_sound(self, channel, key, bar):
-    if key:
-      sound = self.inc_sounds[math.floor(bar * 12)]
-      if channel is None:
-        # logging.debug("started a channel")
-        return sound.play(loops = -1)
-      elif channel.get_sound() is not sound:
-        channel.stop()
-        channel.play(sound, loops = -1)
-        logging.debug("changed a channel sound")
-        return channel
-    elif channel is not None:
-      channel.stop()
-      logging.debug("stopped a channel")
-      return None
-
-    return channel
-
   def reset(self):
     self.bf = self.bj = 0
     self.cooldown = 0
@@ -133,7 +120,8 @@ class Game:
     self.stale_timer = self.STALE_TIME
     self.timer = self.TOTAL_TIME
     self.perc_f = self.perc_j = 0
-    self.f_inc_channel = self.j_inc_channel = None
+    # self.f_inc_channel = self.j_inc_channel = None
+    self.stale_timer_channel = None
 
   def render_stuff(self, screen, render_space = True, render_keys = True):
     # background rendering
