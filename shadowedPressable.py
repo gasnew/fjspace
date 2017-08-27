@@ -16,16 +16,28 @@ class ShadowedPressable:
   def top_left(self):
     return (self.center[0] - self.surface.get_width() / 2, self.center[1] - self.surface.get_height() / 2)
 
+  @property
+  def down(self):
+    return self._down
+  @down.setter
+  def down(self, val):
+    if not self.down and val: self.press_sound.play()
+    elif self.down and not val: self.release_sound.play()
+    self._down = val
+
   def __init__(self, surface, shadow, center, shadow_dist):
     self.surface = surface
     self.shadow = shadow
     self.center = center
     self.shadow_dist = shadow_dist
 
-    self.down = False
+    self._down = False
 
     self.cover = pygame.Surface((self.surface.get_width(), self.surface.get_height())).convert_alpha()
     self.cover.fill(GameColor.Space.Down)
+
+    self.press_sound = pygame.mixer.Sound("SFX/press.wav")
+    self.release_sound = pygame.mixer.Sound("SFX/release.wav")
 
   def render(self, target, cooldown = 0, cover = False):
     if self.down:

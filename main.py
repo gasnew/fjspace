@@ -25,12 +25,11 @@ sys_font = pygame.font.Font("C:\Windows\Fonts\8514oem.fon", 100)
 # ---- THE GAME ITSELF ---- #
 # gameplay params
 AGREE_TIME = 0.5
-WIN_TIME = 8
+WIN_TIME = 6
 COOLDOWN_TIME = 2
 STALE_TIME = 5
 TOTAL_TIME = 35
 FAILURE_TIME = 0.5
-INC_SOUND_TIME = 0.1
 NUM_WINS = 3
 
 # visual params
@@ -49,7 +48,7 @@ shadow_dist = screen.get_width() * 0.005
 
 # main classes
 keys = Keys()
-match = Match(AGREE_TIME, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, INC_SOUND_TIME, NUM_WINS,
+match = Match(AGREE_TIME, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, NUM_WINS,
               keys, p_list_rect, scoreboard_rect, top_rect, top_rect_left, top_rect_right, game_rect, bottom_rect, shadow_dist, sys_font)
 
 # the loop

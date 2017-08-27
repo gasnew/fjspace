@@ -11,10 +11,10 @@ Sound Effects
 - Hold button
 + Climax
 + Celebrate
-/ WIN
-- Tip
-- Tap?
-- Implement mixer
++ WIN
++ Tip
++ Tap?
+- Wheel
 
 New Classes
 + GameColor
@@ -25,12 +25,15 @@ New Classes
   - .to("win_place", Tweener.EASE_OUT)
   - .val
   - .set_to_waypoint("win_place")
-  - .draw_val
+  - .tweened_val
 
 Code Refactoring
 - Migrate lots of Match's rendering code to HUD
 
 Visual Improvements
+- Scoreboard looks bad and has bad design
+- Player list looks okay and has mediocre design
+- Allow font to scale correctly
 + [SPACE] states
   + Gray and down on cooldown
   + Up and white when can space
@@ -38,8 +41,6 @@ Visual Improvements
   + Down and gray when pressed and cannot space
 + Wheel
   + Draw hand as wedge?
-- Scoreboard looks bad and has bad design
-- Player list looks okay and has mediocre design
 + Players have colors
 
 Menu

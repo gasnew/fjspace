@@ -13,7 +13,7 @@ from shadowedPressable import ShadowedPressable
 from gameColor import GameColor
 
 class Match:
-  def __init__(self, AGREE_TIME, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, INC_SOUND_TIME, NUM_WINS,
+  def __init__(self, AGREE_TIME, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, NUM_WINS,
                keys, p_list_rect, scoreboard_rect, top_rect, top_rect_left, top_rect_right, game_rect, bottom_rect, shadow_dist, sys_font):
     # -- IMPORTS --
     self.keys = keys
@@ -31,7 +31,7 @@ class Match:
 
     # -- NECESSARY CLASSES --
     self.p_list = PlayerList(p_list_rect, shadow_dist, sys_font)
-    self.game = Game(WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, INC_SOUND_TIME, self.keys, game_rect, shadow_dist, sys_font)
+    self.game = Game(WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, self.keys, game_rect, shadow_dist, sys_font)
     self.wheel = Wheel(game_rect, shadow_dist, sys_font)
     self.hud = Hud(top_rect, bottom_rect, shadow_dist, sys_font)
     self.scoreboard = Scoreboard(scoreboard_rect, shadow_dist, sys_font, self.p_list)
@@ -103,9 +103,9 @@ class Match:
         self.p_list.swap_players()
       if not self.f_wins == self.j_wins == 0:
         self.p_list.new_opponent()
-        self.vs_sound.play()
       else:
         self.p_list.shuffle()
+      self.p_list.defocus()
 
       self.big_f_agree = self.big_j_agree = 1
       self.f_wins = self.j_wins = 0
@@ -113,6 +113,26 @@ class Match:
       self.j_win_rects = []
 
       self.game.reset()
+
+      self.vs_sound.play()
+    elif state == MatchState.WHEEL:
+      self.wheel.start(self.match_state.state_timer, self.game.perc_f, self.game.perc_j)
+    elif state == MatchState.VICTORY_0:
+      self.climax_sound.play()
+    elif state == MatchState.VICTORY_1:
+      if self.winner == "f":
+        self.f_wins += 1
+        self.p_list.pf.wins += 1
+        self.p_list.pj.losses += 1
+
+        self.f_win_rects.append(self.win_rect.move(-(self.win_rect.width * 2) * self.f_wins - self.shadow_dist, -self.shadow_dist))
+      else:
+        self.j_wins += 1
+        self.p_list.pj.wins += 1
+        self.p_list.pf.losses += 1
+        self.j_win_rects.append(self.win_rect.move((self.win_rect.width * 2) * self.j_wins - self.shadow_dist, -self.shadow_dist))
+
+      random.choice(self.victory_sounds).play()
 
   def match_stuff(self, delta_t):
     # player list stuff
@@ -143,30 +163,13 @@ class Match:
     self.match_state.update(delta_t)
     if self.match_state.state == MatchState.PLAYER_LIST and self.keys.enter:
       self.match_state.set_state(MatchState.NEW_OPPONENT)
-      self.p_list.defocus()
-      self.game.reset()
-      self.vs_sound.play()
     elif self.match_state.state == MatchState.NEW_OPPONENT and self.keys.f and self.keys.j and self.big_f_agree == self.big_j_agree == 0:
       self.match_state.set_state(MatchState.COUNTDOWN)
     elif game_over:
       if self.winner == "stale":
         self.match_state.set_state(MatchState.WHEEL)
-        self.wheel.start(self.match_state.state_timer, perc_f, perc_j)
       else:
-        self.match_state.set_state(MatchState.VICTORY)
-        self.climax_sound.play()
-        random.choice(self.victory_sounds).play()
-        if self.winner == "f":
-          self.f_wins += 1
-          self.p_list.pf.wins += 1
-          self.p_list.pj.losses += 1
-
-          self.f_win_rects.append(self.win_rect.move(-(self.win_rect.width * 2) * self.f_wins - self.shadow_dist, -self.shadow_dist))
-        else:
-          self.j_wins += 1
-          self.p_list.pj.wins += 1
-          self.p_list.pf.losses += 1
-          self.j_win_rects.append(self.win_rect.move((self.win_rect.width * 2) * self.j_wins - self.shadow_dist, -self.shadow_dist))
+        self.match_state.set_state(MatchState.VICTORY_0)
     
   def render_stuff(self, screen):
     self.game.render_stuff(screen, render_space = self.match_state.state == MatchState.RUNNING, render_keys = self.match_state.state != MatchState.NEW_OPPONENT)
