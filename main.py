@@ -1,6 +1,7 @@
 # ---- NECESSARY EVILS ---- #
 # important things
 import logging, sys
+import random
 import pygame
 from pygame.locals import *
 from playerList import PlayerList
@@ -22,7 +23,8 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 RESOLUTION = (640, 480)
 pygame.init()
 screen = pygame.display.set_mode(RESOLUTION)
-logging.debug(pygame.display.get_wm_info())
+pygame.mixer.quit() 
+pygame.mixer.init(frequency=44100, buffer=0)
 
 clock = pygame.time.Clock()
 
@@ -36,6 +38,7 @@ COOLDOWN_TIME = 2
 STALE_TIME = 5
 TOTAL_TIME = 35
 FAILURE_TIME = 0.5
+INC_SOUND_TIME = 0.1
 NUM_WINS = 3
 
 # visual params
@@ -60,7 +63,7 @@ score_streak = 0
 # main classes
 keys = Keys()
 p_list = PlayerList(p_list_rect, shadow_dist, sys_font)
-game = Game(WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font)
+game = Game(WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, INC_SOUND_TIME, keys, game_rect, shadow_dist, sys_font)
 wheel = Wheel(game_rect, shadow_dist, sys_font)
 hud = Hud(top_rect, bottom_rect, shadow_dist, sys_font)
 scoreboard = Scoreboard(scoreboard_rect, shadow_dist, sys_font, p_list)
@@ -85,6 +88,7 @@ def state_response(state):
         p_list.pj.score += score_streak
     else:
       game.reset()
+      begin_sound.play()
   elif state == GameState.NEW_OPPONENT:
     if j_wins == NUM_WINS:
       p_list.swap_players()
@@ -109,7 +113,7 @@ namej = TextRenderer(sys_font, 2, (top_rect_right.centerx, bottom_rect.centery),
 streak_text = TextRenderer(sys_font, 1, (bottom_rect.width * 0.08, bottom_rect.centery + bottom_rect.height * 0.25), shadow_dist)
 big_namef = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.centery), shadow_dist, GameColor.F.Dark)
 big_namej = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.centery), shadow_dist, GameColor.J.Dark)
-vs = TextRenderer(sys_font, 2, game_rect.center, shadow_dist)
+vs_text = TextRenderer(sys_font, 2, game_rect.center, shadow_dist)
 
 big_f, big_f_shadow = ShadowedPressable.make_pressable_key("[F]", sys_font, 4)
 big_f = ShadowedPressable(big_f.convert_alpha(), big_f_shadow, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
@@ -128,6 +132,12 @@ wlf = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.top + game_rec
 wlj = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
 pmf = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.65), shadow_dist)
 pmj = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.65), shadow_dist)
+
+# sounds
+vs_sound = pygame.mixer.Sound("SFX/VS.wav")
+begin_sound = pygame.mixer.Sound("SFX/begin_game.wav")
+climax_sound = pygame.mixer.Sound("SFX/climax.wav")
+victory_sounds = [pygame.mixer.Sound("SFX/vic{0}.wav".format(i)) for i in range(3)]
 
 # the loop
 while 1:
@@ -177,6 +187,7 @@ while 1:
     game_state.set_state(GameState.NEW_OPPONENT)
     p_list.defocus()
     game.reset()
+    vs_sound.play()
   elif game_state.state == GameState.NEW_OPPONENT and keys.f and keys.j and big_f_agree == big_j_agree == 0:
     game_state.set_state(GameState.COUNTDOWN)
   elif game_over:
@@ -185,6 +196,8 @@ while 1:
       wheel.start(game_state.state_timer, perc_f, perc_j)
     else:
       game_state.set_state(GameState.VICTORY)
+      climax_sound.play()
+      random.choice(victory_sounds).play()
       if winner == "f":
         f_wins += 1
         p_list.pf.wins += 1
@@ -216,7 +229,7 @@ while 1:
   if game_state.state == GameState.NEW_OPPONENT:
     big_namef.render(screen, p_list.pf.name, p_list.pf.color)
     big_namej.render(screen, p_list.pj.name, p_list.pj.color)
-    vs.render(screen, "VS")
+    vs_text.render(screen, "VS")
 
     big_f.down = keys.f
     big_j.down = keys.j

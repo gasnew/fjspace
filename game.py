@@ -1,6 +1,6 @@
 # important things
 import logging, sys
-import random
+import random, math
 import pygame
 from pygame.locals import *
 from gameColor import GameColor
@@ -8,13 +8,14 @@ from shadowedPressable import *
 from textRenderer import TextRenderer
 
 class Game:
-  def __init__(self, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, keys, game_rect, shadow_dist, sys_font):
+  def __init__(self, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, INC_SOUND_TIME, keys, game_rect, shadow_dist, sys_font):
     # -- CONSTANTS --
     self.WIN_TIME = WIN_TIME
     self.COOLDOWN_TIME = COOLDOWN_TIME
     self.STALE_TIME = STALE_TIME
     self.TOTAL_TIME = TOTAL_TIME
     self.FAILURE_TIME = FAILURE_TIME
+    self.INC_SOUND_TIME = INC_SOUND_TIME
 
     # -- CONTROLS --
     self.keys = keys
@@ -55,6 +56,10 @@ class Game:
     # text
     self.big_timer = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)
 
+    # sound
+    self.spaced_sound = pygame.mixer.Sound("SFX/spaced.wav")
+    self.inc_sounds = [pygame.mixer.Sound("SFX/inc{0}.wav".format(i)) for i in range(12)]
+
     # -- GAMEPLAY --
     self.reset()
     
@@ -70,18 +75,30 @@ class Game:
       self.perc_j = self.bj / (self.bf + self.bj)
     self.f_spaced = self.f_spaced - (delta_t / (self.FAILURE_TIME * 1000)) if self.f_spaced > 0 else 0
     self.j_spaced = self.j_spaced - (delta_t / (self.FAILURE_TIME * 1000)) if self.j_spaced > 0 else 0
+    self.f_inc_timer = self.f_inc_timer - (delta_t / 1000) if self.f_inc_timer > 0 else 0
+    self.j_inc_timer = self.j_inc_timer - (delta_t / 1000) if self.j_inc_timer > 0 else 0
 
     f, j, s = self.keys.f, self.keys.j, self.keys.s
     if f:
       if s and self.cooldown == 0:
         self.bf = 0
         self.f_spaced = 1
-      else: self.bf += delta_t / (self.WIN_TIME * 1000)
+        self.spaced_sound.play()
+      else: 
+        self.bf += delta_t / (self.WIN_TIME * 1000)
+        if self.f_inc_timer == 0:
+          self.f_inc_timer = self.INC_SOUND_TIME
+          self.inc_sounds[math.floor(self.bf * 12)].play()
     if j:
       if s and self.cooldown == 0:
         self.bj = 0
         self.j_spaced = 1
-      else: self.bj += delta_t / (self.WIN_TIME * 1000)
+        self.spaced_sound.play()
+      else:
+        self.bj += delta_t / (self.WIN_TIME * 1000)
+        if self.j_inc_timer == 0:
+          self.j_inc_timer = self.INC_SOUND_TIME
+          self.inc_sounds[math.floor(self.bj * 12)].play()
 
     if s and (f or j) and self.cooldown == 0:
         self.cooldown = 1
@@ -103,6 +120,7 @@ class Game:
     self.stale_timer = self.STALE_TIME
     self.timer = self.TOTAL_TIME
     self.perc_f = self.perc_j = 0
+    self.f_inc_timer = self.j_inc_timer = 0
 
   def render_stuff(self, screen, render_space = True, render_keys = True):
     # background rendering

@@ -4,6 +4,18 @@ TODO
 Bugs
 + can draw infinitesimal wedges
 
+Sound Effects
+/ VS
+/ Increment
+/ Spaced
+- Hold button
+/ Climax
+/ Celebrate
+/ WIN
+- Tip
+- Tap?
+- Implement mixer
+
 New Classes
 + GameColor
   + e.g. GameColor.F.Light
@@ -12,6 +24,7 @@ New Classes
   - .add_waypoint("win_place", win_val)
   - .to("win_place", Tweener.EASE_OUT)
   - .val
+  - .set_to_waypoint("win_place")
   - .draw_val
 
 Visual Improvements
@@ -35,15 +48,15 @@ Menu
   - Reset current round
   - Reset scoreboard(?)
   - Change players
-- While holding [1], hold a key and release [1] to activate functionality
+- While holding [1], hold a key for 0.25 seconds to activate functionality
 
 Game
 + WIN and LOSE text for game end
 - Wheel
   - percentages next to wedges
   - animated wedge opening (pf, pj, and mag)
-- Special timer countdown for final 7 seconds
-- End game if [SPACE] held for 6 seconds
+/ Special timer countdown for final 7 seconds
++ End game if [SPACE] held for 6 seconds
 
 Hotseat Mode
 + Open game with two text boxes for names. Hit '+' to add more, '-' to subtract
