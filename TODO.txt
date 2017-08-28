@@ -39,15 +39,16 @@ Visual Improvements
 + Players have colors
 
 Menu
-- At any time, hold [1] to view menu
++ At any time, hold [1] to view menu
   - Practice mode
     - Normal mode with no scoreboard consequences
     - Show 3 instructions with special blend mode for awesome watermark display
     - PRACTICE MODE across bottom
-  - Reset current round
+  + Reset current round
+  + New opponent
+  + Change players
   - Reset scoreboard(?)
-  - Change players
-- While holding [1], hold a key for 0.25 seconds to activate functionality
++ While holding [1], hold a key for 0.25 seconds to activate functionality
 
 Game
 + WIN and LOSE text for game end

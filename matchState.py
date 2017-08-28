@@ -24,10 +24,10 @@ class MatchState:
       elif self.state == MatchState.WHEEL: self.set_state(MatchState.VICTORY_0)
       elif self.state == MatchState.VICTORY_0: self.set_state(MatchState.VICTORY_1)
       elif self.state == MatchState.VICTORY_1: self.set_state(MatchState.COUNTDOWN)
-      elif self.state == MatchState.WINNER: self.set_state(MatchState.NEW_OPPONENT)
+      elif self.state == MatchState.WINNER: self.set_state(MatchState.NEW_OPPONENT, next = True)
 
-  def set_state(self, state):
+  def set_state(self, state, **kwargs):
     self.state = state
     self.state_timer = MatchState.STATE_TIMERS[state]
 
-    self.game_callback(state)
+    self.game_callback(state, **kwargs)

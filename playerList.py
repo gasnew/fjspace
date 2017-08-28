@@ -4,6 +4,7 @@ import pygame
 from pygame.locals import *
 from gameColor import GameColor
 from textRenderer import TextRenderer
+from shadowedPressable import ShadowedPressable
 
 class Entry:
     @property
@@ -47,9 +48,18 @@ class PlayerList:
     player_rect_width = max_text_size[0] + self.rect_edge_buffer * 2
 
     self.background = pygame.Surface(rect.size, pygame.SRCALPHA)
-    self.background.fill((0, 0, 0, 50))
-    self.bounding_rect = pygame.Rect((edge_buffer, edge_buffer), (self.background.get_width() - edge_buffer * 2, self.background.get_height() - edge_buffer * 2))
+    self.background.fill((0, 0, 0, 100))
+    self.bounding_rect = pygame.Rect((edge_buffer, edge_buffer * 2), (self.background.get_width() - edge_buffer * 2, self.background.get_height() - edge_buffer * 3))
     self.player_rect = pygame.Rect((self.bounding_rect.centerx - player_rect_width / 2, self.bounding_rect.top), (player_rect_width, max_text_size[1]))
+
+    self.title_text = TextRenderer(sys_font, 2, (rect.centerx, rect.top + max_text_size[1] / 2), shadow_dist)
+
+    plus_text, plus_text_shadow = ShadowedPressable.make_pressable_key("[+] to add", sys_font, 1)
+    self.plus_text = ShadowedPressable(plus_text.convert_alpha(), plus_text_shadow, (rect.centerx * 1.75, rect.height * 0.45), shadow_dist / 2)
+    minus_text, minus_text_shadow = ShadowedPressable.make_pressable_key("[-] to subtract", sys_font, 1)
+    self.minus_text = ShadowedPressable(minus_text.convert_alpha(), minus_text_shadow, (rect.centerx * 1.75, rect.height * 0.5), shadow_dist / 2)
+    enter_text, enter_text_shadow = ShadowedPressable.make_pressable_key("[ENTER] to proceed", sys_font, 1)
+    self.enter_text = ShadowedPressable(enter_text.convert_alpha(), enter_text_shadow, (rect.centerx * 1.75, rect.height * 0.6), shadow_dist / 2)
 
     # list stuff
     self.list = []
@@ -61,8 +71,9 @@ class PlayerList:
     self.pf = self.list[0]
     self.pj = self.list[1]
 
-  def p_list_stuff(self):
-    pass
+  def p_list_stuff(self, plus, minus):
+    self.plus_text.down = plus
+    self.minus_text.down = minus
 
   def focus(self):
     self.in_focus = True
@@ -71,7 +82,7 @@ class PlayerList:
   def defocus(self):
     self.in_focus = False
 
-  def addEntry(self, name = "AAA"):
+  def addEntry(self, name = "A"):
     unique_colors = [color for color in GameColor.PlayerColors if color not in [p.color for p in self.list]]
     color = random.choice(unique_colors) if len(unique_colors) > 0 else random.choice(GameColor.PlayerColors)
 
@@ -99,8 +110,9 @@ class PlayerList:
       # add/remove names
       if char == 61: # +
         self.addEntry()
-      elif char == 45 and len(self.list) > 2: # -
-        self.removeEntry(self.list.index(self.selected))
+      elif char == 45: # -
+        if self.selected not in {self.pf, self.pj}:
+          self.removeEntry(self.list.index(self.selected))
 
   def shuffle(self):
     random.shuffle(self.list)
@@ -142,3 +154,9 @@ class PlayerList:
     self.player_rect.move_ip(-self.shadow_dist * 2, -self.shadow_dist * 2)
     pygame.draw.rect(screen, self.selected.color, self.player_rect)
     self.selected.render(screen)
+
+    # title text
+    self.title_text.render(screen, "PLAYERS")
+    self.plus_text.render(screen)
+    self.minus_text.render(screen)
+    self.enter_text.render(screen)

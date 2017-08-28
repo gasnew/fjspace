@@ -11,16 +11,18 @@ class Wheel:
   RES = 32
   SIZE = (RES, RES) # a 64 x 64 wheel
   ANGLE_INTERVAL = 0.001 # percent-wheel interval for rendering wedges
-  REVOLUTIONS = 4 # number of times the arm goes around the wheel before stopping
+  REVOLUTIONS = 5 # number of times the arm goes around the wheel before stopping
   HIGHLIGHT_TIME = 0.3 # period of flashing
 
   def __init__(self, game_rect, shadow_dist, sys_font):
+    shadow_dist = shadow_dist / 2
+
     self.game_rect = game_rect
     self.shadow_dist = shadow_dist
     self.sys_font = sys_font
 
     # placement
-    self.rect = Rect((0, 0), (game_rect.width / 8, game_rect.width / 8))
+    self.rect = Rect((0, 0), (game_rect.height / 4, game_rect.height / 4))
     self.rect.center = (game_rect.centerx, game_rect.top + game_rect.height * 0.3)
 
     # text
@@ -105,13 +107,14 @@ class Wheel:
     screen.blit(surface, self.rect.topleft)
 
     # render text
+    mag = self.rect.width
     pf_a = self.pf_tweener.tweened_val / 2
-    self.pf_text.center = (self.rect.centerx + -self.rect.width * sin(2 * pi * pf_a), self.rect.centery + -self.rect.width * cos(2 * pi * pf_a))
+    self.pf_text.center = (self.rect.centerx + -mag * sin(2 * pi * pf_a), self.rect.centery + -mag * cos(2 * pi * pf_a))
     pf_str = str(round(self.pf_tweener.tweened_val * 100)).split('.')[0] + '%' 
     self.pf_text.render(screen, pf_str)
     
     pj_a = 1 - (self.pj_tweener.tweened_val - self.pf_tweener.tweened_val) / 2
-    self.pj_text.center = (self.rect.centerx + -self.rect.width * sin(2 * pi * pj_a), self.rect.centery + -self.rect.width * cos(2 * pi * pj_a))
+    self.pj_text.center = (self.rect.centerx + -mag * sin(2 * pi * pj_a), self.rect.centery + -mag * cos(2 * pi * pj_a))
     pj_str = str(round((self.pj_tweener.tweened_val - self.pf_tweener.tweened_val) * 100)).split('.')[0] + '%'
     self.pj_text.render(screen, pj_str)
 

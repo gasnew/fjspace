@@ -3,7 +3,8 @@ from pygame.locals import *
 
 class Keys:
   def __init__(self):
-    self.f = self.j = self.s = self.enter = self.tab = self.alt = self.f4 = self.f11_toggle = 0
+    self.f = self.j = self.s = self.plus = self.minus = self.enter = self.tab = self.alt = self.f4 = self.f11_toggle = False
+    self.nums = dict((i + 48, False) for i in range(10))
 
   def update(self, events, callback = lambda *args: None):
     for event in events:
@@ -13,6 +14,10 @@ class Keys:
         self.j = event.type == KEYDOWN
       elif event.key == 32: 
         self.s = event.type == KEYDOWN
+      elif event.key == 61:
+        self.plus = event.type == KEYDOWN
+      elif event.key == 45: 
+        self.minus = event.type == KEYDOWN
       elif event.key == 13:
         self.enter = event.type == KEYDOWN
       elif event.key == 9:
@@ -23,6 +28,8 @@ class Keys:
         self.f4 = event.type == KEYDOWN
       elif event.key == 292:
         self.f11_toggle = (not self.f11_toggle) if event.type == KEYDOWN else self.f11_toggle
+      elif event.key in self.nums:
+        self.nums[event.key] = event.type == KEYDOWN
 
       if event.type == KEYDOWN:
         callback(event.key)

@@ -12,7 +12,7 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 # includes critical, error, warning, info, debug :)
 
 # init pygame whatnot
-RESOLUTION = (640, 480)
+RESOLUTION = (853, 480)
 pygame.init()
 screen = pygame.display.set_mode(RESOLUTION)
 pygame.mixer.quit() 
@@ -34,7 +34,7 @@ NUM_WINS = 3
 
 # visual params
 p_list_rect = pygame.Rect((0, 0), (screen.get_width(), screen.get_height()))
-scoreboard_rect = pygame.Rect((screen.get_width() * 0.1, screen.get_height() * 0.1), (screen.get_width() * 0.8, screen.get_height() * 0.8))
+scoreboard_rect = pygame.Rect((screen.get_width() * 0.3125, screen.get_height() * 0.1), (screen.get_width() * 0.375, screen.get_height() * 0.8))
 
 top_rect = pygame.Rect(0, 0, screen.get_width(), screen.get_height() * 0.2)
 top_rect_left = pygame.Rect(0, 0, screen.get_width() / 2, top_rect.height)

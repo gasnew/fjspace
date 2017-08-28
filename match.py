@@ -7,6 +7,7 @@ from game import Game
 from wheel import Wheel
 from hud import Hud
 from scoreboard import Scoreboard
+from menu import Menu
 from matchState import MatchState
 from textRenderer import TextRenderer
 from shadowedPressable import ShadowedPressable
@@ -37,7 +38,14 @@ class Match:
     self.wheel = Wheel(game_rect, shadow_dist, sys_font)
     self.hud = Hud(top_rect, bottom_rect, shadow_dist, sys_font)
     self.scoreboard = Scoreboard(scoreboard_rect, shadow_dist, sys_font, self.p_list)
+    self.menu = Menu(p_list_rect, self.keys, shadow_dist, sys_font)
     self.match_state = MatchState(MatchState.PLAYER_LIST, self.state_response)
+
+    # -- MENU ACTIONS --
+    self.menu.add_item("[2]", "PRACTICE MODE", 0.25, lambda : self.match_state.set_state(MatchState.PRACTICE_MODE))
+    self.menu.add_item("[3]", "RESET MATCHUP", 0.5, lambda : self.match_state.set_state(MatchState.COUNTDOWN))
+    self.menu.add_item("[4]", "NEXT OPPONENT", 0.5, lambda : self.match_state.set_state(MatchState.NEW_OPPONENT, next = True))
+    self.menu.add_item("[5]", "CHANGE PLAYERS", 1, lambda : self.match_state.set_state(MatchState.PLAYER_LIST))
 
     # -- RENDERING --
     # bottom bar
@@ -67,7 +75,7 @@ class Match:
     self.ready_text = TextRenderer(sys_font, 2, (game_rect.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
 
     # win rects
-    win_rect_size = top_rect.width * 0.02
+    win_rect_size = top_rect.height * 0.15
     self.win_rect = Rect(top_rect.centerx - win_rect_size / 2, win_rect_size, win_rect_size, win_rect_size)
     self.win_rect_shadows = [self.win_rect.move(self.win_rect.width * 2 * idx, 0) for idx in [-3, -2, -1, 1, 2, 3]]
     self.f_win_rects = []
@@ -95,14 +103,23 @@ class Match:
     self.reset()
 
   def reset(self):
+    self.match_num = 0
+    self.big_f_agree = self.big_j_agree = 0
+    self.f_wins = self.j_wins = 0
+    self.score_streak = 0
+
     self.winner = ""
     self.hold_wheel_render = False
 
     self.p_list.focus()
     self.match_state.set_state(MatchState.PLAYER_LIST)
 
-  def state_response(self, state):
-    if state == MatchState.COUNTDOWN:
+  def state_response(self, state, **kwargs):
+    self.p_list.defocus()
+
+    if state == MatchState.PLAYER_LIST:
+      self.p_list.focus()
+    elif state == MatchState.COUNTDOWN:
       if self.NUM_WINS in {self.f_wins, self.j_wins}:
         self.match_state.set_state(MatchState.WINNER)
         self.f_win_loss_text.color = GameColor.Green if self.winner == "f" else GameColor.Red
@@ -127,9 +144,10 @@ class Match:
     elif state == MatchState.NEW_OPPONENT:
       if self.j_wins == self.NUM_WINS:
         self.p_list.swap_players()
-      if not self.f_wins == self.j_wins == 0:
+
+      if kwargs.get("next"):
         self.p_list.new_opponent()
-      else:
+      elif kwargs.get("shuffle"):
         self.p_list.shuffle()
       
       self.p_list.defocus()
@@ -169,7 +187,7 @@ class Match:
 
   def match_stuff(self, delta_t):
     # player list stuff
-    self.p_list.p_list_stuff()
+    self.p_list.p_list_stuff(self.keys.plus, self.keys.minus)
 
     # game stuff
     game_over = False
@@ -195,7 +213,7 @@ class Match:
     # state stuff
     self.match_state.update(delta_t)
     if self.match_state.state == MatchState.PLAYER_LIST and self.keys.enter:
-      self.match_state.set_state(MatchState.NEW_OPPONENT)
+      self.match_state.set_state(MatchState.NEW_OPPONENT, shuffle = self.match_num == 0)
     elif self.match_state.state == MatchState.NEW_OPPONENT and self.keys.f and self.keys.j and self.big_f_agree == self.big_j_agree == 0:
       self.match_state.set_state(MatchState.COUNTDOWN)
     elif game_over and self.match_state.state in {MatchState.RUNNING, MatchState.WHEEL}:
@@ -203,6 +221,16 @@ class Match:
         self.match_state.set_state(MatchState.WHEEL)
       else:
         self.match_state.set_state(MatchState.VICTORY_0)
+
+    # menu stuff
+    if self.keys.nums[49]:
+      if not self.menu.in_focus and self.menu.can_focus: self.menu.focus()
+      self.menu.can_focus = False
+    else:
+      self.menu.defocus()
+      self.menu.can_focus = True
+
+    self.menu.menu_stuff(delta_t)
 
     # tween stuff
     self.vs_bar_w.tween_stuff(delta_t)
@@ -223,7 +251,7 @@ class Match:
 
     self.f_name_text.render(screen, self.p_list.pf.name, GameColor.lighten(self.p_list.pf.color))
     self.j_name_text.render(screen, self.p_list.pj.name, GameColor.lighten(self.p_list.pj.color))
-    self.streak_text.render(screen, "streak:{0}".format(self.score_streak))
+    self.streak_text.render(screen, "STREAK:{0}".format(self.score_streak))
 
     if self.match_state.state == MatchState.NEW_OPPONENT:
       self.new_match_text.render(screen, "MATCH {0}!".format(self.match_num))
@@ -256,10 +284,13 @@ class Match:
     for rect in self.f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
     for rect in self.j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 
-    self.hud.render_stuff(screen, self.game.timer, self.game.perc_f, self.game.perc_j, render_percs = self.match_state.state in {MatchState.RUNNING, MatchState.WHEEL})
+    self.hud.render_stuff(screen, self.game.timer, self.game.perc_f, self.game.perc_j, render_percs = self.match_state.state in {MatchState.RUNNING})
 
     if self.match_state.state == MatchState.PLAYER_LIST:
       self.p_list.render_stuff(screen)
 
     if (not (self.match_state.state in {MatchState.PLAYER_LIST, MatchState.RUNNING})) and self.keys.tab:
       self.scoreboard.render_stuff(screen)
+
+    if self.menu.in_focus:
+      self.menu.render_stuff(screen)
