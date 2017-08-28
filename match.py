@@ -26,6 +26,7 @@ class Match:
     self.shadow_dist = shadow_dist
 
     # -- MATCH INFO --
+    self.match_num = 0
     self.big_f_agree = self.big_j_agree = 0
     self.f_wins = self.j_wins = 0
     self.score_streak = 0
@@ -45,7 +46,9 @@ class Match:
     self.streak_text = TextRenderer(sys_font, 1, (bottom_rect.width * 0.08, bottom_rect.centery + bottom_rect.height * 0.25), shadow_dist)
     
     # vs
-    self.vs_left_bar = Rect((0, game_rect.y + game_rect.height / 4), (top_rect_left.width, game_rect.height / 5))
+    self.new_match_text = TextRenderer(sys_font, 4, (game_rect.centerx, game_rect.top + game_rect.height / 6), shadow_dist, GameColor.White)
+
+    self.vs_left_bar = Rect((0, game_rect.y + game_rect.height / 3), (top_rect_left.width, game_rect.height / 5))
     self.vs_right_bar = Rect((game_rect.centerx, self.vs_left_bar.bottom), (self.vs_left_bar.width, self.vs_left_bar.height))
     vs_par_width = game_rect.height / 7
     self.vs_parallelogram = ((game_rect.centerx, self.vs_left_bar.top), (game_rect.centerx - vs_par_width, self.vs_right_bar.bottom), (game_rect.centerx, self.vs_right_bar.bottom), (game_rect.centerx + vs_par_width, self.vs_left_bar.top))
@@ -55,9 +58,9 @@ class Match:
     self.vs_left_bar.move_ip((top_rect_left.width, 0))
 
     big_f, big_f_shadow = ShadowedPressable.make_pressable_key("[F]", sys_font, 4)
-    self.big_f = ShadowedPressable(big_f.convert_alpha(), big_f_shadow, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
+    self.big_f = ShadowedPressable(big_f.convert_alpha(), big_f_shadow, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.85), shadow_dist)
     big_j, big_j_shadow = ShadowedPressable.make_pressable_key("[J]", sys_font, 4)
-    self.big_j = ShadowedPressable(big_j.convert_alpha(), big_j_shadow, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.8), shadow_dist)
+    self.big_j = ShadowedPressable(big_j.convert_alpha(), big_j_shadow, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.85), shadow_dist)
 
     # counter
     self.counter = TextRenderer(sys_font, 4, game_rect.center, shadow_dist)
@@ -93,6 +96,7 @@ class Match:
 
   def reset(self):
     self.winner = ""
+    self.hold_wheel_render = False
 
     self.p_list.focus()
     self.match_state.set_state(MatchState.PLAYER_LIST)
@@ -118,6 +122,8 @@ class Match:
         self.game.reset()
         self.begin_sound.play()
         self.timer_sound.play(loops = 2)
+
+      self.hold_wheel_render = False
     elif state == MatchState.NEW_OPPONENT:
       if self.j_wins == self.NUM_WINS:
         self.p_list.swap_players()
@@ -125,8 +131,10 @@ class Match:
         self.p_list.new_opponent()
       else:
         self.p_list.shuffle()
+      
       self.p_list.defocus()
 
+      self.match_num += 1
       self.big_f_agree = self.big_j_agree = 1
       self.f_wins = self.j_wins = 0
       self.f_win_rects = []
@@ -141,6 +149,7 @@ class Match:
       self.vs_sound.play()
     elif state == MatchState.WHEEL:
       self.wheel.start(self.match_state.state_timer, self.game.perc_f, self.game.perc_j)
+      self.hold_wheel_render = True
     elif state == MatchState.VICTORY_0:
       self.climax_sound.play()
     elif state == MatchState.VICTORY_1:
@@ -169,7 +178,7 @@ class Match:
       game_over, self.winner, perc_f, perc_j = self.game.game_stuff(delta_t)
 
     # wheel stuff
-    if self.match_state.state == MatchState.WHEEL:
+    if self.match_state.state == MatchState.WHEEL or self.hold_wheel_render:
       game_over, self.winner = self.wheel.wheel_stuff(delta_t)
 
     # hud stuff
@@ -189,7 +198,7 @@ class Match:
       self.match_state.set_state(MatchState.NEW_OPPONENT)
     elif self.match_state.state == MatchState.NEW_OPPONENT and self.keys.f and self.keys.j and self.big_f_agree == self.big_j_agree == 0:
       self.match_state.set_state(MatchState.COUNTDOWN)
-    elif game_over:
+    elif game_over and self.match_state.state in {MatchState.RUNNING, MatchState.WHEEL}:
       if self.winner == "stale":
         self.match_state.set_state(MatchState.WHEEL)
       else:
@@ -205,7 +214,7 @@ class Match:
     if self.match_state.state == MatchState.COUNTDOWN:
       self.counter.render(screen, str(self.match_state.state_timer)[:4])
       self.ready_text.render(screen, "READY?!?")
-    if self.match_state.state == MatchState.WHEEL:
+    if self.match_state.state == MatchState.WHEEL or self.hold_wheel_render:
       self.wheel.render(screen)
 
     pygame.draw.rect(screen, GameColor.F.Med, self.top_rect_left)
@@ -217,6 +226,8 @@ class Match:
     self.streak_text.render(screen, "streak:{0}".format(self.score_streak))
 
     if self.match_state.state == MatchState.NEW_OPPONENT:
+      self.new_match_text.render(screen, "MATCH {0}!".format(self.match_num))
+
       self.vs_left_bar.width = -self.vs_bar_w.tweened_val
       self.vs_right_bar.width = self.vs_bar_w.tweened_val
       pygame.draw.rect(screen, GameColor.White, self.vs_left_bar)

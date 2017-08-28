@@ -20,13 +20,7 @@ Sound Effects
 New Classes
 + GameColor
   + e.g. GameColor.F.Light
-- Tweener
-  - Tweener(init_val)
-  - .add_waypoint("win_place", win_val)
-  - .to("win_place", Tweener.EASE_OUT)
-  - .val
-  - .set_to_waypoint("win_place")
-  - .tweened_val
++ Tweener
 
 Code Refactoring
 - Migrate lots of Match's rendering code to HUD
@@ -57,9 +51,9 @@ Menu
 
 Game
 + WIN and LOSE text for game end
-- Wheel
-  - percentages next to wedges
-  - animated wedge opening (pf, pj, and mag)
++ Wheel
+  + percentages next to wedges
+  + animated wedge opening (pf, pj, and mag)
 / Special timer countdown for final 7 seconds
 + End game if [SPACE] held for 6 seconds
 

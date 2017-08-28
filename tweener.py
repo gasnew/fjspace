@@ -24,6 +24,9 @@ class Tweener:
     if name in self.waypoints:
       self.val = self.waypoints[name]
       self.tween_type = tween_type
+    elif isinstance(name, (int, float)):
+      self.val = name
+      self.tween_type = tween_type
     else:
       logging.error("waypoint {0} does not exist".format(name))
 
