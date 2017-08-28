@@ -15,7 +15,7 @@ class Wheel:
   HIGHLIGHT_TIME = 0.3 # period of flashing
 
   def __init__(self, game_rect, shadow_dist, sys_font):
-    shadow_dist = shadow_dist / 2
+    shadow_dist = shadow_dist * 0.75
 
     self.game_rect = game_rect
     self.shadow_dist = shadow_dist

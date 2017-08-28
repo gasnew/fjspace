@@ -34,6 +34,8 @@ class Entry:
       self.text.render(screen, self.name)
 
 class PlayerList:
+  DEFAULT_NAMES = ["FRAN", "JAN", "STEVE", "WARBUCKS", "OLAF", "EVE", "ALICE", "WIZARD"]
+
   def __init__(self, rect, shadow_dist, sys_font):
     self.rect = rect
     self.sys_font = sys_font
@@ -63,9 +65,13 @@ class PlayerList:
 
     # list stuff
     self.list = []
-    self.addEntry("FRAN")
-    self.addEntry("JAN")
+    self.addEntry()
+    self.addEntry()
     self.selected = self.list[0]
+
+    # sound stuff
+    self.press_sound = pygame.mixer.Sound("SFX/press_soft.wav")
+    self.release_sound = pygame.mixer.Sound("SFX/release.wav")
 
     # outward facing stuff
     self.pf = self.list[0]
@@ -82,7 +88,11 @@ class PlayerList:
   def defocus(self):
     self.in_focus = False
 
-  def addEntry(self, name = "A"):
+  def addEntry(self, name = None):
+    if name is None:
+      unique_names = [name for name in PlayerList.DEFAULT_NAMES if name not in [p.name for p in self.list]]      
+      name = random.choice(unique_names) if len(unique_names) > 0 else random.choice(PlayerList.DEFAULT_NAMES)
+
     unique_colors = [color for color in GameColor.PlayerColors if color not in [p.color for p in self.list]]
     color = random.choice(unique_colors) if len(unique_colors) > 0 else random.choice(GameColor.PlayerColors)
 
@@ -98,8 +108,10 @@ class PlayerList:
       # edit name
       if 97 <= char <= 122 and len(self.selected.name) < 8:
         self.selected.name += chr(char - 32)
+        self.press_sound.play()
       elif char == 8: # bs
         self.selected.name = self.selected.name[:-1]
+        self.release_sound.play()
 
       # change selected
       if char == 273 or char == 274:

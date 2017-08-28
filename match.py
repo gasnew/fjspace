@@ -43,7 +43,7 @@ class Match:
 
     # -- MENU ACTIONS --
     self.menu.add_item("[2]", "PRACTICE MODE", 0.25, lambda : self.match_state.set_state(MatchState.PRACTICE_MODE))
-    self.menu.add_item("[3]", "RESET MATCHUP", 0.5, lambda : self.match_state.set_state(MatchState.COUNTDOWN))
+    self.menu.add_item("[3]", "RESET MATCHUP", 0.5, lambda : self.match_state.set_state(MatchState.NEW_OPPONENT, same_match = True))
     self.menu.add_item("[4]", "NEXT OPPONENT", 0.5, lambda : self.match_state.set_state(MatchState.NEW_OPPONENT, next = True))
     self.menu.add_item("[5]", "CHANGE PLAYERS", 1, lambda : self.match_state.set_state(MatchState.PLAYER_LIST))
 
@@ -152,7 +152,7 @@ class Match:
       
       self.p_list.defocus()
 
-      self.match_num += 1
+      if not kwargs.get("same_match"): self.match_num += 1
       self.big_f_agree = self.big_j_agree = 1
       self.f_wins = self.j_wins = 0
       self.f_win_rects = []
@@ -160,7 +160,7 @@ class Match:
 
       self.game.reset()
 
-      self.vs_bar_w.set_to("retracted").tween_to("extended", schmaltz = 50)
+      self.vs_bar_w.set_to("retracted").tween_to("extended", schmaltz = 70)
       self.f_name_big_x.set_to("out").tween_to("in", schmaltz = 300)
       self.j_name_big_x.set_to("out").tween_to("in", schmaltz = 300)
 
@@ -213,7 +213,8 @@ class Match:
     # state stuff
     self.match_state.update(delta_t)
     if self.match_state.state == MatchState.PLAYER_LIST and self.keys.enter:
-      self.match_state.set_state(MatchState.NEW_OPPONENT, shuffle = self.match_num == 0)
+      logging.debug(self.match_num)
+      self.match_state.set_state(MatchState.NEW_OPPONENT, shuffle = self.match_num == 0, same_match = self.match_num != 0)
     elif self.match_state.state == MatchState.NEW_OPPONENT and self.keys.f and self.keys.j and self.big_f_agree == self.big_j_agree == 0:
       self.match_state.set_state(MatchState.COUNTDOWN)
     elif game_over and self.match_state.state in {MatchState.RUNNING, MatchState.WHEEL}:
@@ -238,7 +239,12 @@ class Match:
     self.j_name_big_x.tween_stuff(delta_t)
     
   def render_stuff(self, screen):
-    self.game.render_stuff(screen, render_space = self.match_state.state == MatchState.RUNNING, render_keys = self.match_state.state != MatchState.NEW_OPPONENT)
+    self.game.render_stuff(
+      screen,
+      render_space = self.match_state.state == MatchState.RUNNING,
+      render_keys = self.match_state.state != MatchState.NEW_OPPONENT,
+      disable_keys = self.match_state.state == MatchState.PLAYER_LIST)
+    
     if self.match_state.state == MatchState.COUNTDOWN:
       self.counter.render(screen, str(self.match_state.state_timer)[:4])
       self.ready_text.render(screen, "READY?!?")
@@ -289,7 +295,7 @@ class Match:
     if self.match_state.state == MatchState.PLAYER_LIST:
       self.p_list.render_stuff(screen)
 
-    if (not (self.match_state.state in {MatchState.PLAYER_LIST, MatchState.RUNNING})) and self.keys.tab:
+    if (not (self.match_state.state in {MatchState.PLAYER_LIST})) and self.keys.tab:
       self.scoreboard.render_stuff(screen)
 
     if self.menu.in_focus:

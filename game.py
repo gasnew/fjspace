@@ -123,7 +123,7 @@ class Game:
     # self.f_inc_channel = self.j_inc_channel = None
     self.stale_timer_channel = None
 
-  def render_stuff(self, screen, render_space = True, render_keys = True):
+  def render_stuff(self, screen, render_space = True, render_keys = True, disable_keys = False):
     # background rendering
     hsva = self.f_background_color.hsva
     self.fbc.hsva = (hsva[0], hsva[1], hsva[2] + (100 - hsva[2]) * self.f_spaced, hsva[3])
@@ -141,8 +141,8 @@ class Game:
 
     # pressables rendering
     f, j, s = self.keys.f, self.keys.j, self.keys.s
-    self.f_text.down = f
-    self.j_text.down = j
+    self.f_text.down = f if not disable_keys else False
+    self.j_text.down = j if not disable_keys else False
     self.space_text.down = s or self.cooldown > 0
     if render_keys:
       self.f_text.render(screen)

@@ -9,7 +9,7 @@ class GameColor:
   Green = (41, 238, 0)
   Blue = (0, 181, 204)
   Pink = (255, 106, 173)
-  Yellow = (255, 255, 0)
+  Yellow = (242, 232, 96)
   Cyan = (17, 255, 200)
   Orange = (255, 121, 0)
   Gold = (230, 192, 106)
@@ -18,7 +18,8 @@ class GameColor:
   
   class F:
     Light = (221, 218, 199)
-    Med = (206, 194, 136)
+    # Med = (206, 194, 136)
+    Med = (198, 186, 127)
     Dark = (168, 132, 35)
   class J:
     Light = (204, 214, 221)

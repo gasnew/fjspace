@@ -12,7 +12,7 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 # includes critical, error, warning, info, debug :)
 
 # init pygame whatnot
-RESOLUTION = (853, 480)
+RESOLUTION = (854, 480)
 pygame.init()
 screen = pygame.display.set_mode(RESOLUTION)
 pygame.mixer.quit() 
@@ -70,7 +70,8 @@ while 1:
     pygame.display.set_mode(RESOLUTION)
 
   # update stuff
-  match.match_stuff(delta_t)
+  if not keys.p_toggle:
+    match.match_stuff(delta_t)
 
   # render stuff
   match.render_stuff(screen)
