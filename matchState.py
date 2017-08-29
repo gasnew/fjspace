@@ -9,7 +9,9 @@ class MatchState:
   VICTORY_0 = 5
   VICTORY_1 = 6
   WINNER = 7
-  STATE_TIMERS = [0, 0, 3, 0, 2, 1, 1.5, 8]
+  PRACTICE_MODE = 8
+  PRACTICE_VICTORY = 9
+  STATE_TIMERS = [0, 0, 3, 0, 2, 1, 1.5, 8, 0, 2]
 
   def __init__(self, state, func):
     self.game_callback = func
@@ -25,6 +27,7 @@ class MatchState:
       elif self.state == MatchState.VICTORY_0: self.set_state(MatchState.VICTORY_1)
       elif self.state == MatchState.VICTORY_1: self.set_state(MatchState.COUNTDOWN)
       elif self.state == MatchState.WINNER: self.set_state(MatchState.NEW_OPPONENT, next = True)
+      elif self.state == MatchState.PRACTICE_VICTORY: self.set_state(MatchState.PRACTICE_MODE)
 
   def set_state(self, state, **kwargs):
     self.state = state

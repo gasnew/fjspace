@@ -66,8 +66,11 @@ class Game:
   def game_stuff(self, delta_t):
     # mechanics stuff
     self.cooldown = self.cooldown - (delta_t / (self.COOLDOWN_TIME * 1000)) if self.cooldown > 0 else 0
-    if self.keys.s and self.cooldown == 0: self.stale_timer = self.stale_timer - (delta_t / 1000) if self.stale_timer > 0 else 0
-    self.timer = self.timer - (delta_t / 1000) if self.timer > 0 else 0
+
+    if not self.practice:
+      if self.keys.s and self.cooldown == 0: self.stale_timer = self.stale_timer - (delta_t / 1000) if self.stale_timer > 0 else 0
+      self.timer = self.timer - (delta_t / 1000) if self.timer > 0 else 0
+    
     if self.bf + self.bj == 0:
       self.perc_f = self.perc_j = 0.5
     else:
@@ -98,7 +101,7 @@ class Game:
       self.stale_timer = min([self.STALE_TIME, self.timer])
 
     # sound
-    if self.stale_timer < 3:
+    if 0 < self.stale_timer < 3:
       if self.stale_timer_channel is None:
         self.stale_timer_channel = self.timer_sound.play(loops = 2)
     elif self.stale_timer_channel is not None:
@@ -113,15 +116,17 @@ class Game:
 
     return game_over, winner, self.perc_f, self.perc_j
 
-  def reset(self):
+  def reset(self, practice = False):
     self.bf = self.bj = 0
     self.cooldown = 0
     self.f_spaced = self.j_spaced = 0
     self.stale_timer = self.STALE_TIME
-    self.timer = self.TOTAL_TIME
+    self.timer = self.TOTAL_TIME if not practice else -1
     self.perc_f = self.perc_j = 0
-    # self.f_inc_channel = self.j_inc_channel = None
+
     self.stale_timer_channel = None
+
+    self.practice = practice
 
   def render_stuff(self, screen, render_space = True, render_keys = True, disable_keys = False):
     # background rendering
@@ -151,5 +156,5 @@ class Game:
     if render_space:
       self.space_text.render(screen, self.cooldown, not f and not j)
 
-      if self.stale_timer < 3:
+      if 0 <= self.stale_timer < 3:
         self.big_timer.render(screen, str(self.stale_timer)[:4])

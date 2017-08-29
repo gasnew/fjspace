@@ -24,6 +24,7 @@ class Hud:
     timer_str = str(timer).split('.')
     if len(timer_str) == 1: timer_str = [timer_str[0], "00"]
     timer_str = timer_str[0].zfill(2) + ':' + (timer_str[1].zfill(2))[:2]
+    if timer == -1: timer_str = "Inf" 
     self.timer_text.render(screen, timer_str)
 
     # percentage

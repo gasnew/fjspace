@@ -52,6 +52,12 @@ class Match:
     self.f_name_text = TextRenderer(sys_font, 2, (top_rect_left.centerx, bottom_rect.centery), shadow_dist)
     self.j_name_text = TextRenderer(sys_font, 2, (top_rect_right.centerx, bottom_rect.centery), shadow_dist)
     self.streak_text = TextRenderer(sys_font, 1, (bottom_rect.width * 0.08, bottom_rect.centery + bottom_rect.height * 0.25), shadow_dist)
+
+    self.practice_mode_text = TextRenderer(sys_font, 2, bottom_rect.center, 0)
+    self.practice_inst_rect = Rect((game_rect.left + game_rect.height * 0.1, game_rect.top + game_rect.height * 0.1), (game_rect.width, game_rect.height * 0.8))
+    self.practice_inst_0 = ShadowedPressable.make_pressable_key("1. Hold your key to build your bar", sys_font, 2, GameColor.Black)[0]
+    self.practice_inst_0 = ShadowedPressable.make_pressable_key("2. Press [SPACE] to reset moving bars", sys_font, 2, GameColor.Black)[0]
+    self.practice_inst_0 = ShadowedPressable.make_pressable_key("3. Build the biggest bar to win", sys_font, 2, GameColor.Black)[0]
     
     # vs
     self.new_match_text = TextRenderer(sys_font, 4, (game_rect.centerx, game_rect.top + game_rect.height / 6), shadow_dist, GameColor.White)
@@ -116,6 +122,7 @@ class Match:
 
   def state_response(self, state, **kwargs):
     self.p_list.defocus()
+    if state not in {MatchState.VICTORY_0, MatchState.VICTORY_1}: self.hold_wheel_render = False
 
     if state == MatchState.PLAYER_LIST:
       self.p_list.focus()
@@ -139,8 +146,6 @@ class Match:
         self.game.reset()
         self.begin_sound.play()
         self.timer_sound.play(loops = 2)
-
-      self.hold_wheel_render = False
     elif state == MatchState.NEW_OPPONENT:
       if self.j_wins == self.NUM_WINS:
         self.p_list.swap_players()
@@ -184,6 +189,11 @@ class Match:
         self.j_win_rects.append(self.win_rect.move((self.win_rect.width * 2) * self.j_wins - self.shadow_dist, -self.shadow_dist))
 
       random.choice(self.victory_sounds).play()
+    elif state == MatchState.PRACTICE_MODE:
+      self.game.reset(practice = True)
+      self.begin_sound.play()
+    elif state == MatchState.PRACTICE_VICTORY:
+      self.climax_sound.play()
 
   def match_stuff(self, delta_t):
     # player list stuff
@@ -192,7 +202,7 @@ class Match:
     # game stuff
     game_over = False
     perc_f = perc_j = 0
-    if self.match_state.state == MatchState.RUNNING:
+    if self.match_state.state in {MatchState.RUNNING, MatchState.PRACTICE_MODE}:
       game_over, self.winner, perc_f, perc_j = self.game.game_stuff(delta_t)
 
     # wheel stuff
@@ -216,9 +226,11 @@ class Match:
       self.match_state.set_state(MatchState.NEW_OPPONENT, shuffle = self.match_num == 0, same_match = self.match_num != 0)
     elif self.match_state.state == MatchState.NEW_OPPONENT and self.keys.f and self.keys.j and self.big_f_agree == self.big_j_agree == 0:
       self.match_state.set_state(MatchState.COUNTDOWN)
-    elif game_over and self.match_state.state in {MatchState.RUNNING, MatchState.WHEEL}:
+    elif game_over and self.match_state.state in {MatchState.RUNNING, MatchState.WHEEL, MatchState.PRACTICE_MODE}:
       if self.winner == "stale":
         self.match_state.set_state(MatchState.WHEEL)
+      elif self.match_state.state == MatchState.PRACTICE_MODE:
+        self.match_state.set_state(MatchState.PRACTICE_VICTORY)
       else:
         self.match_state.set_state(MatchState.VICTORY_0)
 
@@ -240,11 +252,11 @@ class Match:
   def render_stuff(self, screen):
     self.game.render_stuff(
       screen,
-      render_space = self.match_state.state == MatchState.RUNNING,
+      render_space = self.match_state.state in {MatchState.RUNNING, MatchState.PRACTICE_MODE},
       render_keys = self.match_state.state != MatchState.NEW_OPPONENT,
       disable_keys = self.match_state.state == MatchState.PLAYER_LIST)
     
-    if self.match_state.state == MatchState.COUNTDOWN:
+    if self.match_state.state == MatchState.COUNTDOWN and self.match_state.state_timer >= 0:
       self.counter.render(screen, str(self.match_state.state_timer)[:4])
       self.ready_text.render(screen, "READY?!?")
     if self.match_state.state == MatchState.WHEEL or self.hold_wheel_render:
@@ -254,9 +266,16 @@ class Match:
     pygame.draw.rect(screen, GameColor.J.Med, self.top_rect_right)
     pygame.draw.rect(screen, GameColor.Shadow, self.bottom_rect)
 
-    self.f_name_text.render(screen, self.p_list.pf.name, GameColor.lighten(self.p_list.pf.color))
-    self.j_name_text.render(screen, self.p_list.pj.name, GameColor.lighten(self.p_list.pj.color))
-    self.streak_text.render(screen, "STREAK:{0}".format(self.score_streak))
+    if self.match_state.state not in {MatchState.PRACTICE_MODE, MatchState.PRACTICE_VICTORY}:
+      self.f_name_text.render(screen, self.p_list.pf.name, GameColor.lighten(self.p_list.pf.color))
+      self.j_name_text.render(screen, self.p_list.pj.name, GameColor.lighten(self.p_list.pj.color))
+      self.streak_text.render(screen, "STREAK:{0}".format(self.score_streak))
+    else:
+      self.practice_mode_text.render(screen, "PRACTICE MODE", GameColor.Gold)
+
+      # left = self.game_rect.width * 0.1
+      # top = self.game_rect.top + self.game_rect.height * 0.1
+      screen.blit(self.practice_inst_0, self.practice_inst_rect.topleft)
 
     if self.match_state.state == MatchState.NEW_OPPONENT:
       self.new_match_text.render(screen, "MATCH {0}!".format(self.match_num))
@@ -285,11 +304,12 @@ class Match:
       self.f_plus_minus_text.render(screen, "+{0}".format(self.score_streak) if self.winner == "f" else "")
       self.j_plus_minus_text.render(screen, "+1" if self.winner == "j" else "")
 
-    for rect in self.win_rect_shadows: pygame.draw.rect(screen, GameColor.Shadow, rect)
-    for rect in self.f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
-    for rect in self.j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
+    if self.match_state.state not in {MatchState.PRACTICE_MODE, MatchState.PRACTICE_VICTORY}:
+      for rect in self.win_rect_shadows: pygame.draw.rect(screen, GameColor.Shadow, rect)
+      for rect in self.f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
+      for rect in self.j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 
-    self.hud.render_stuff(screen, self.game.timer, self.game.perc_f, self.game.perc_j, self.keys.nums[49], render_percs = self.match_state.state in {MatchState.RUNNING})
+    self.hud.render_stuff(screen, self.game.timer, self.game.perc_f, self.game.perc_j, self.keys.nums[49], render_percs = self.match_state.state in {MatchState.RUNNING, MatchState.PRACTICE_MODE})
 
     if self.match_state.state == MatchState.PLAYER_LIST:
       self.p_list.render_stuff(screen)

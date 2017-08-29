@@ -4,6 +4,7 @@ from pygame.locals import Color
 class GameColor:
   White = (255, 255, 255)
   Shadow = (50, 50, 50)
+  Black = (0, 0, 0)
 
   Red = (255, 39, 20)
   Green = (41, 238, 0)
