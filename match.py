@@ -315,7 +315,7 @@ class Match:
     if self.match_state.state == MatchState.PLAYER_LIST:
       self.p_list.render_stuff(screen)
 
-    if (not (self.match_state.state in {MatchState.PLAYER_LIST})) and self.keys.tab:
+    if self.keys.tab:
       self.scoreboard.render_stuff(screen)
 
     if self.menu.in_focus:
