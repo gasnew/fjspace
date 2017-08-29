@@ -15,6 +15,13 @@ from gameColor import GameColor
 from tweener import Tweener
 
 class Match:
+  # -- NECESSARY CONSTANTS --
+  ENCOURAGEMENTS = ["Nice!", "Better than I expected...", "[REDACTED]", "Congratulations!", "Have a slice of 3.1415926535897932384626.",
+                    "[VICTORY MESSAGE]", "Wow!", "Great, kid! Don't get cocky.", "Gnarly!", "I love you."]
+  CONSOLATIONS = ["The other guy's cheating!", "You've got red on you!", "'Tis but a scratch!", "Help, I'm trapped in a universe factory.",
+                  "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness",
+                  "I know.", "Not like this...", "Huh?", "Not my tempo.", "Don't grumble; give a whistle!", "At least you're just practicing."]
+
   def __init__(self, AGREE_TIME, WIN_TIME, COOLDOWN_TIME, STALE_TIME, TOTAL_TIME, FAILURE_TIME, NUM_WINS,
                keys, p_list_rect, scoreboard_rect, top_rect, top_rect_left, top_rect_right, game_rect, bottom_rect, shadow_dist, sys_font):
     # -- IMPORTS --
@@ -54,10 +61,10 @@ class Match:
     self.streak_text = TextRenderer(sys_font, 1, (bottom_rect.width * 0.08, bottom_rect.centery + bottom_rect.height * 0.25), shadow_dist)
 
     self.practice_mode_text = TextRenderer(sys_font, 2, bottom_rect.center, 0)
-    self.practice_inst_rect = Rect((game_rect.left + game_rect.height * 0.1, game_rect.top + game_rect.height * 0.1), (game_rect.width, game_rect.height * 0.4))
-    self.practice_inst_0 = ShadowedPressable.make_pressable_key("1. Hold your key to build your bar.", sys_font, 2, GameColor.Green)[0].convert_alpha()
-    self.practice_inst_1 = ShadowedPressable.make_pressable_key("2. Press [SPACE] to reset moving bars.", sys_font, 2, GameColor.F.Dark)[0].convert_alpha()
-    self.practice_inst_2 = ShadowedPressable.make_pressable_key("3. Build the biggest bar to win!", sys_font, 2, GameColor.Blue)[0].convert_alpha()
+    self.practice_inst_rect = Rect((game_rect.left + game_rect.height * 0.05, game_rect.top + game_rect.height * 0.05), (game_rect.width, game_rect.height * 0.25))
+    self.practice_inst_0 = ShadowedPressable.make_pressable_key("1. Hold your key to build your bar.", sys_font, 1, GameColor.Pink)[0].convert_alpha()
+    self.practice_inst_1 = ShadowedPressable.make_pressable_key("2. Press [SPACE] to reset moving bars.", sys_font, 1, GameColor.Cyan)[0].convert_alpha()
+    self.practice_inst_2 = ShadowedPressable.make_pressable_key("3. Build the biggest bar to win!", sys_font, 1, GameColor.Yellow)[0].convert_alpha()
     
     # vs
     self.new_match_text = TextRenderer(sys_font, 4, (game_rect.centerx, game_rect.top + game_rect.height / 6), shadow_dist, GameColor.White)
@@ -92,6 +99,8 @@ class Match:
     self.j_win_loss_text = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.35), shadow_dist)
     self.f_plus_minus_text = TextRenderer(sys_font, 4, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.65), shadow_dist)
     self.j_plus_minus_text = TextRenderer(sys_font, 4, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.65), shadow_dist)
+    self.f_enc_cons_text = TextRenderer(sys_font, 1, (top_rect_left.centerx, game_rect.top + game_rect.height * 0.5), shadow_dist / 8)
+    self.j_enc_cons_text = TextRenderer(sys_font, 1, (top_rect_right.centerx, game_rect.top + game_rect.height * 0.5), shadow_dist / 8)
 
     # tweens
     self.vs_bar_w = Tweener({"retracted": 0, "extended": top_rect_left.width}, "retracted")
@@ -119,6 +128,9 @@ class Match:
 
     self.p_list.focus()
     self.match_state.set_state(MatchState.PLAYER_LIST)
+
+    self.encouragement = ""
+    self.consolation = ""
 
   def state_response(self, state, **kwargs):
     self.p_list.defocus()
@@ -194,6 +206,11 @@ class Match:
       self.begin_sound.play()
     elif state == MatchState.PRACTICE_VICTORY:
       self.climax_sound.play()
+      
+      self.f_enc_cons_text.color = GameColor.Green if self.winner == "f" else GameColor.Red
+      self.j_enc_cons_text.color = GameColor.Green if self.winner == "j" else GameColor.Red
+      self.encouragement = random.choice(Match.ENCOURAGEMENTS)
+      self.consolation = random.choice(Match.CONSOLATIONS)
 
   def match_stuff(self, delta_t):
     # player list stuff
@@ -311,6 +328,10 @@ class Match:
       for rect in self.j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 
     self.hud.render_stuff(screen, self.game.timer, self.game.perc_f, self.game.perc_j, self.keys.nums[49], render_percs = self.match_state.state in {MatchState.RUNNING, MatchState.PRACTICE_MODE})
+
+    if self.match_state.state == MatchState.PRACTICE_VICTORY:
+      self.f_enc_cons_text.render(screen, self.encouragement if self.winner == "f" else self.consolation)
+      self.j_enc_cons_text.render(screen, self.encouragement if self.winner == "j" else self.consolation)
 
     if self.match_state.state == MatchState.PLAYER_LIST:
       self.p_list.render_stuff(screen)
