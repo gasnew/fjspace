@@ -40,10 +40,10 @@ Visual Improvements
 
 Menu
 + At any time, hold [1] to view menu
-  - Practice mode
-    - Normal mode with no scoreboard consequences
-    - Show 3 instructions with special blend mode for awesome watermark display
-    - PRACTICE MODE across bottom
+  + Practice mode
+    + Normal mode with no scoreboard consequences
+    / Show 3 instructions with special blend mode for awesome watermark display
+    + PRACTICE MODE across bottom
   + Reset current round
   + New opponent
   + Change players
