@@ -20,7 +20,7 @@ pygame.mixer.init(frequency=44100, buffer=0)
 
 clock = pygame.time.Clock()
 
-sys_font = pygame.font.Font("C:\Windows\Fonts\8514oem.fon", 100)
+sys_font = pygame.font.Font(".\8514oem.fon", 20)
 
 # ---- THE GAME ITSELF ---- #
 # gameplay params

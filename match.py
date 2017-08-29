@@ -54,10 +54,10 @@ class Match:
     self.streak_text = TextRenderer(sys_font, 1, (bottom_rect.width * 0.08, bottom_rect.centery + bottom_rect.height * 0.25), shadow_dist)
 
     self.practice_mode_text = TextRenderer(sys_font, 2, bottom_rect.center, 0)
-    self.practice_inst_rect = Rect((game_rect.left + game_rect.height * 0.1, game_rect.top + game_rect.height * 0.1), (game_rect.width, game_rect.height * 0.8))
-    self.practice_inst_0 = ShadowedPressable.make_pressable_key("1. Hold your key to build your bar", sys_font, 2, GameColor.Black)[0]
-    self.practice_inst_0 = ShadowedPressable.make_pressable_key("2. Press [SPACE] to reset moving bars", sys_font, 2, GameColor.Black)[0]
-    self.practice_inst_0 = ShadowedPressable.make_pressable_key("3. Build the biggest bar to win", sys_font, 2, GameColor.Black)[0]
+    self.practice_inst_rect = Rect((game_rect.left + game_rect.height * 0.1, game_rect.top + game_rect.height * 0.1), (game_rect.width, game_rect.height * 0.4))
+    self.practice_inst_0 = ShadowedPressable.make_pressable_key("1. Hold your key to build your bar.", sys_font, 2, GameColor.Green)[0].convert_alpha()
+    self.practice_inst_1 = ShadowedPressable.make_pressable_key("2. Press [SPACE] to reset moving bars.", sys_font, 2, GameColor.F.Dark)[0].convert_alpha()
+    self.practice_inst_2 = ShadowedPressable.make_pressable_key("3. Build the biggest bar to win!", sys_font, 2, GameColor.Blue)[0].convert_alpha()
     
     # vs
     self.new_match_text = TextRenderer(sys_font, 4, (game_rect.centerx, game_rect.top + game_rect.height / 6), shadow_dist, GameColor.White)
@@ -273,9 +273,10 @@ class Match:
     else:
       self.practice_mode_text.render(screen, "PRACTICE MODE", GameColor.Gold)
 
-      # left = self.game_rect.width * 0.1
-      # top = self.game_rect.top + self.game_rect.height * 0.1
-      screen.blit(self.practice_inst_0, self.practice_inst_rect.topleft)
+      diff = (self.practice_inst_rect.height - self.practice_inst_0.get_height()) / (3 - 1)
+      screen.blit(self.practice_inst_0, self.practice_inst_rect.topleft, special_flags = BLEND_RGB_SUB)
+      screen.blit(self.practice_inst_1, (self.practice_inst_rect.left, self.practice_inst_rect.top + diff), special_flags = BLEND_RGB_SUB)
+      screen.blit(self.practice_inst_2, (self.practice_inst_rect.left, self.practice_inst_rect.top + 2 * diff), special_flags = BLEND_RGB_SUB)
 
     if self.match_state.state == MatchState.NEW_OPPONENT:
       self.new_match_text.render(screen, "MATCH {0}!".format(self.match_num))
