@@ -42,10 +42,10 @@ class Match:
     self.match_state = MatchState(MatchState.PLAYER_LIST, self.state_response)
 
     # -- MENU ACTIONS --
-    self.menu.add_item("[2]", "PRACTICE MODE", 0.25, lambda : self.match_state.set_state(MatchState.PRACTICE_MODE))
+    self.menu.add_item("[2]", "PRACTICE MODE", 0.5, lambda : self.match_state.set_state(MatchState.PRACTICE_MODE))
     self.menu.add_item("[3]", "RESET MATCHUP", 0.5, lambda : self.match_state.set_state(MatchState.NEW_OPPONENT, same_match = True))
     self.menu.add_item("[4]", "NEXT OPPONENT", 0.5, lambda : self.match_state.set_state(MatchState.NEW_OPPONENT, next = True))
-    self.menu.add_item("[5]", "CHANGE PLAYERS", 1, lambda : self.match_state.set_state(MatchState.PLAYER_LIST))
+    self.menu.add_item("[5]", "CHANGE PLAYERS", 0.5, lambda : self.match_state.set_state(MatchState.PLAYER_LIST))
 
     # -- RENDERING --
     # bottom bar
@@ -213,7 +213,6 @@ class Match:
     # state stuff
     self.match_state.update(delta_t)
     if self.match_state.state == MatchState.PLAYER_LIST and self.keys.enter:
-      logging.debug(self.match_num)
       self.match_state.set_state(MatchState.NEW_OPPONENT, shuffle = self.match_num == 0, same_match = self.match_num != 0)
     elif self.match_state.state == MatchState.NEW_OPPONENT and self.keys.f and self.keys.j and self.big_f_agree == self.big_j_agree == 0:
       self.match_state.set_state(MatchState.COUNTDOWN)
@@ -290,7 +289,7 @@ class Match:
     for rect in self.f_win_rects: pygame.draw.rect(screen, GameColor.F.Light, rect)
     for rect in self.j_win_rects: pygame.draw.rect(screen, GameColor.J.Light, rect)
 
-    self.hud.render_stuff(screen, self.game.timer, self.game.perc_f, self.game.perc_j, render_percs = self.match_state.state in {MatchState.RUNNING})
+    self.hud.render_stuff(screen, self.game.timer, self.game.perc_f, self.game.perc_j, self.keys.nums[49], render_percs = self.match_state.state in {MatchState.RUNNING})
 
     if self.match_state.state == MatchState.PLAYER_LIST:
       self.p_list.render_stuff(screen)

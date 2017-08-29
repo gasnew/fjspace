@@ -34,9 +34,12 @@ class Wheel:
     self.pj_tweener = Tweener({"start": 0})
     self.highlight_timer = 0
 
+    # sound
+    self.spin_sound = pygame.mixer.Sound("SFX/clock.wav")
+
     self.reset()
 
-    self.start(2, 0.5, 0.5)
+    # self.start(2, 0.5, 0.5)
 
   def reset(self):
     self.spin_time = 2
@@ -59,6 +62,8 @@ class Wheel:
 
     self.pf_tweener.set_to("start").tween_to(self.pf)
     self.pj_tweener.set_to("start").tween_to(1)
+
+    self.spin_sound.play()
 
   def wheel_stuff(self, delta_t):
     self.t_elapsed += (delta_t / 1000)

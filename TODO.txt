@@ -15,7 +15,7 @@ Sound Effects
 + Tip
 + Tap?
 + Timer beep
-- Wheel
++ Wheel
 
 New Classes
 + GameColor
@@ -27,7 +27,7 @@ Code Refactoring
 
 Visual Improvements
 - Scoreboard looks bad and has bad design
-- Player list looks okay and has mediocre design
+/ Player list looks okay and has mediocre design
 - Allow font to scale correctly
 + [SPACE] states
   + Gray and down on cooldown
